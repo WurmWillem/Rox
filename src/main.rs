@@ -1,4 +1,4 @@
-use std::{fs, thread::current};
+use std::fs;
 
 use token_type::TokenType;
 
