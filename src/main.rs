@@ -164,6 +164,10 @@ impl Scanner {
         self.source.as_bytes()[self.current] as char
     }
 
+    fn get_next_char(&self) -> char {
+        self.source.as_bytes()[self.current + 1] as char
+    }
+
     fn add_token(&mut self, kind: TokenType) {
         let text = (&self.source[self.start..self.current]).to_string();
 
@@ -175,13 +179,29 @@ impl Scanner {
         self.tokens.push(Token::new(kind, text, literal, self.line));
     }
 
-    fn add_num_token(&self) {
-        todo!()
-    }
-}
+    fn add_num_token(&mut self) {
+        while self.peek().is_digit(10) {
+            self.current += 1;
+        }
 
-fn is_digit(c: char) -> bool {
-    todo!()
+        if self.peek() == '.' && self.peek_next().is_digit(10) {
+            self.current += 1;
+
+            while self.peek().is_digit(10) {
+                self.current += 1;
+            }
+        }
+
+        //se
+    }
+
+    fn peek_next(&self) -> char {
+        if self.current >= self.source.len() {
+            '\0'
+        } else {
+            self.get_next_char()
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
