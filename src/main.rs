@@ -35,6 +35,9 @@ impl Lox {
         }
     }
 }
+fn error(line: usize, message: &str) {
+    panic!("[line {}] Error: {}", line, message);
+}
 
 struct Scanner {
     source: String,
@@ -55,18 +58,15 @@ impl Scanner {
             line: 1,
         }
     }
+
     fn scan_tokens(&mut self) -> Vec<Token> {
         while !self.at_end_input() {
             self.start = self.current;
             self.scan_token();
         }
 
-        self.tokens.push(Token::new(
-            TokenType::EOF,
-            "".to_string(),
-            "".to_string(),
-            self.line,
-        ));
+        self.tokens
+            .push(Token::new(TokenType::EOF, "".to_string(), None, self.line));
 
         self.tokens.clone()
     }
@@ -120,9 +120,31 @@ impl Scanner {
                 }
             }
 
+            '"' => {
+                while self.peek() != '"' && !self.at_end_input() {
+                    if self.peek() == '\n' {
+                        self.line += 1;
+                    }
+                    self.current += 1;
+                }
+                if self.at_end_input() {
+                    error(self.line, "Unterminated string, bozo");
+                    return;
+                }
+
+                self.current += 1;
+                self.add_token(TokenType::String);
+            }
+
             ' ' | '\r' | '\t' => (),
             '\n' => self.line += 1,
-            _ => (),
+            _ => {
+                if c.is_digit(10) {
+                    self.add_num_token()
+                } else {
+                    error(self.line, "unexpected character, seems like a skill issue");
+                }
+            }
         }
     }
 
@@ -144,21 +166,34 @@ impl Scanner {
 
     fn add_token(&mut self, kind: TokenType) {
         let text = (&self.source[self.start..self.current]).to_string();
-        self.tokens
-            .push(Token::new(kind, text, "".to_string(), self.line));
+
+        let mut literal = None;
+        if kind == TokenType::String {
+            literal = Some((&self.source[(self.start + 1)..(self.current - 1)]).to_string());
+        }
+
+        self.tokens.push(Token::new(kind, text, literal, self.line));
     }
+
+    fn add_num_token(&self) {
+        todo!()
+    }
+}
+
+fn is_digit(c: char) -> bool {
+    todo!()
 }
 
 #[derive(Debug, Clone)]
 struct Token {
     kind: TokenType,
     lexeme: String,
-    literal: String,
+    literal: Option<String>,
     line: usize,
 }
 
 impl Token {
-    fn new(kind: TokenType, lexeme: String, literal: String, line: usize) -> Self {
+    fn new(kind: TokenType, lexeme: String, literal: Option<String>, line: usize) -> Self {
         Self {
             kind,
             lexeme,
@@ -168,10 +203,9 @@ impl Token {
     }
     fn to_string(&self) -> String {
         //format!("{:?}{}{}", self.kind, self.lexeme, self.literal)
-        self.lexeme.clone()
+        match &self.literal {
+            Some(l) => l.clone(),
+            _ => self.lexeme.clone(),
+        }
     }
-}
-
-fn error(line: usize, message: String) {
-    println!("[line {}] Error: {}", line, message);
 }
