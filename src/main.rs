@@ -2,13 +2,13 @@ use std::fs;
 
 use scanner::Scanner;
 
-mod token_type;
-mod token;
 mod scanner;
+mod token;
+mod token_type;
 
 fn main() {
     let mut lox = Lox::new();
-    lox.run("file.txt".to_string());
+    lox.run("file.txt");
 }
 
 struct Lox {
@@ -18,10 +18,12 @@ struct Lox {
 impl Lox {
     fn new() -> Self {
         //Self { had_error: false }
-        Self { }
+        Self {}
     }
-    fn run(&mut self, mut source: String) {
-        source = fs::read_to_string(source).unwrap();
+
+    fn run(&mut self, source: &str) {
+        let source = source.to_string();
+        let source = fs::read_to_string(source).unwrap();
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
@@ -30,6 +32,7 @@ impl Lox {
         }
     }
 }
+
 pub fn error(line: usize, message: &str) {
     panic!("[line {}] Error: {}", line, message);
 }
