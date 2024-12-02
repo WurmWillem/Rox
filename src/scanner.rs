@@ -1,6 +1,6 @@
 use crate::error;
+use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
-use crate::token::Token;
 
 pub struct Scanner {
     source: String,
@@ -28,8 +28,12 @@ impl Scanner {
             self.scan_token();
         }
 
-        self.tokens
-            .push(Token::new(TokenType::EOF, "".to_string(), None, self.line));
+        self.tokens.push(Token::new(
+            TokenType::EOF,
+            "".to_string(),
+            Literal::None,
+            self.line,
+        ));
 
         self.tokens.clone()
     }
@@ -96,7 +100,11 @@ impl Scanner {
                 }
 
                 self.current += 1;
-                self.add_token(TokenType::String);
+
+                let lit =
+                    Literal::Str(self.source[(self.start + 1)..(self.current - 1)].to_string());
+
+                self.add_lit_token(TokenType::String, lit);
             }
 
             ' ' | '\r' | '\t' => (),
@@ -131,15 +139,12 @@ impl Scanner {
         self.source.as_bytes()[self.current + 1] as char
     }
 
+    fn add_lit_token(&mut self, kind: TokenType, lit: Literal) {
+        let text = self.source[self.start..self.current].to_string();
+        self.tokens.push(Token::new(kind, text, lit, self.line));
+    }
     fn add_token(&mut self, kind: TokenType) {
-        let text = (&self.source[self.start..self.current]).to_string();
-
-        let mut literal = None;
-        if kind == TokenType::String {
-            literal = Some((&self.source[(self.start + 1)..(self.current - 1)]).to_string());
-        }
-
-        self.tokens.push(Token::new(kind, text, literal, self.line));
+        self.add_lit_token(kind, Literal::None)
     }
 
     fn add_num_token(&mut self) {
@@ -155,7 +160,9 @@ impl Scanner {
             }
         }
 
-        //se
+        let num = self.source[(self.start + 1)..(self.current - 1)].to_string();
+        let num = num.parse::<f64>().unwrap();
+        self.add_lit_token(TokenType::Number, Literal::Num(num))
     }
 
     fn peek_next(&self) -> char {
