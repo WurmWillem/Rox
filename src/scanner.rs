@@ -30,7 +30,7 @@ impl Scanner {
             ("dit".to_string(), TokenType::This),
             ("ouder".to_string(), TokenType::Super),
             ("klas".to_string(), TokenType::Class),
-            ("fun".to_string(), TokenType::Fun),
+            ("procedure".to_string(), TokenType::Fun),
             ("laat".to_string(), TokenType::Var),
             ("retour".to_string(), TokenType::Return),
             ("yap".to_string(), TokenType::Print),
@@ -196,7 +196,8 @@ impl Scanner {
             }
         }
 
-        let num = self.source[(self.start + 1)..(self.current - 1)].to_string();
+        let num = self.source[(self.start + 0)..(self.current - 0)].to_string();
+        //println!("{}", num);
         let num = num.parse::<f64>().unwrap();
         self.add_lit_token(TokenType::Number, Literal::Num(num))
     }

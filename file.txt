@@ -1,7 +1,2 @@
->+-
-// this is a comment
-"hhhey how ya doing?!"
-5
-***
-var x = ***
-****
+var x = 523
+var y = "yo, yo, yo"

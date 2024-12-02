@@ -22,14 +22,6 @@ impl Lox {
     }
     fn run(&mut self, mut source: String) {
         source = fs::read_to_string(source).unwrap();
-        //for i in 0..source.len() {
-        //    if source.as_bytes()[i] as char == '\n' {
-        //        print!("s");
-        //    }
-        //
-        //    //print!("{}", source.as_bytes()[i] as char);
-        //}
-        //return;
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
