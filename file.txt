@@ -1,4 +1,7 @@
 >+-
 // this is a comment
 "hhhey how ya doing?!"
+5
 ***
+var x = ***
+****

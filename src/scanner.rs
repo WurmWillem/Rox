@@ -140,7 +140,14 @@ impl Scanner {
                     while self.peek().is_alphanumeric() {
                         self.current += 1;
                     }
-                    self.add_token(TokenType::Identifier)
+
+                    let text = self.source[self.start..self.current].to_string();
+                    let kind = match self.keywords.get(&text) {
+                        Some(k) => *k,
+                        None => TokenType::Identifier
+                    };
+
+                    self.add_token(kind)
                 } else {
                     error(self.line, "unexpected character, seems like a skill issue");
                 }
