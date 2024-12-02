@@ -1,7 +1,6 @@
 use std::fs;
 
 use scanner::Scanner;
-use token_type::TokenType;
 
 mod token_type;
 mod token;
@@ -13,12 +12,13 @@ fn main() {
 }
 
 struct Lox {
-    had_error: bool,
+    //had_error: bool,
 }
 
 impl Lox {
     fn new() -> Self {
-        Self { had_error: false }
+        //Self { had_error: false }
+        Self { }
     }
     fn run(&mut self, mut source: String) {
         source = fs::read_to_string(source).unwrap();

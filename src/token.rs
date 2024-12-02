@@ -1,6 +1,6 @@
 use crate::token_type::TokenType;
 
-#[derive(Debug, Clone)]
+#[derive( Clone)]
 pub struct Token {
     kind: TokenType,
     lexeme: String,
@@ -26,10 +26,12 @@ impl Token {
     }
     pub fn to_string(&self) -> String {
         //format!("{:?}{}{}", self.kind, self.lexeme, self.literal)
-        //match &self.literal {
-        //    Some(l) => l.clone(),
-        //    _ => self.lexeme.clone(),
-        //}
-        self.lexeme.clone()
+        match &self.literal {
+            Literal::Str(s) => s.clone(),
+            Literal::Num(n) => n.to_string(),
+            //_ => self.lexeme.clone(),
+            _ => "".to_string(),
+        }
+        //self.lexeme.clone()
     }
 }
