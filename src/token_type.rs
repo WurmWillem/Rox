@@ -47,4 +47,18 @@ pub enum TokenType {
     While,
     //
     EOF,
+    //Anders,
+    //Nietus,
+    //Functie,
+    //Voor,
+    //Als,
+    //Niks,
+    //Of,
+    //Print,
+    //Return,
+    //Super,
+    //Dit,
+    //Wellus,
+    //Var,
+    //Terwijl,
 }

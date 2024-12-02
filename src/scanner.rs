@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error;
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
@@ -5,6 +7,7 @@ use crate::token_type::TokenType;
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
+    keywords: HashMap<String, TokenType>,
 
     start: usize,
     current: usize,
@@ -13,9 +16,30 @@ pub struct Scanner {
 
 impl Scanner {
     pub fn new(source: String) -> Self {
+        //let mut keywords = HashMap::new();
+        let keywords = HashMap::from([
+            ("en".to_string(), TokenType::And),
+            ("of".to_string(), TokenType::Or),
+            ("als".to_string(), TokenType::If),
+            ("anders".to_string(), TokenType::Else),
+            ("terwijl".to_string(), TokenType::While),
+            ("voor".to_string(), TokenType::For),
+            ("wellus".to_string(), TokenType::True),
+            ("nietus".to_string(), TokenType::False),
+            ("niks".to_string(), TokenType::Nil),
+            ("dit".to_string(), TokenType::This),
+            ("ouder".to_string(), TokenType::Super),
+            ("klas".to_string(), TokenType::Class),
+            ("fun".to_string(), TokenType::Fun),
+            ("laat".to_string(), TokenType::Var),
+            ("retour".to_string(), TokenType::Return),
+            ("yap".to_string(), TokenType::Print),
+        ]);
+
         Self {
             source,
             tokens: vec![],
+            keywords,
             start: 0,
             current: 0,
             line: 1,
@@ -112,6 +136,11 @@ impl Scanner {
             _ => {
                 if c.is_digit(10) {
                     self.add_num_token()
+                } else if c.is_alphabetic() || c == '_' {
+                    while self.peek().is_alphanumeric() {
+                        self.current += 1;
+                    }
+                    self.add_token(TokenType::Identifier)
                 } else {
                     error(self.line, "unexpected character, seems like a skill issue");
                 }
