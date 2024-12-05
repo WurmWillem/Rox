@@ -17,24 +17,18 @@ pub struct Scanner {
 impl Scanner {
     pub fn new(source: String) -> Self {
         //let mut keywords = HashMap::new();
-        let keywords = HashMap::from([
-            ("en".to_string(), TokenType::And),
-            ("of".to_string(), TokenType::Or),
-            ("als".to_string(), TokenType::If),
-            ("anders".to_string(), TokenType::Else),
-            ("terwijl".to_string(), TokenType::While),
-            ("voor".to_string(), TokenType::For),
-            ("wellus".to_string(), TokenType::True),
-            ("nietus".to_string(), TokenType::False),
-            ("niks".to_string(), TokenType::Nil),
-            ("dit".to_string(), TokenType::This),
-            ("ouder".to_string(), TokenType::Super),
-            ("klas".to_string(), TokenType::Class),
-            ("procedure".to_string(), TokenType::Fun),
-            ("laat".to_string(), TokenType::Var),
-            ("retour".to_string(), TokenType::Return),
-            ("yap".to_string(), TokenType::Print),
-        ]);
+        macro_rules! create_keywords {
+            ($($k: expr, $v: ident)*) => {
+                HashMap::from([
+                    $(($k.to_string(), TokenType::$v),)*
+                ])
+            };
+        }
+        let keywords = create_keywords!(
+            "en",And "of",Or "als",If "anders",Else "terwijl",While "voor",For
+            "wellus",True "nietus",False "niks",Nil "dit",This "ouder",Super
+            "klas",Class "traject",Fun "laat",Var "retour",Return "spreek",Print
+        );
 
         Self {
             source,
@@ -111,6 +105,7 @@ impl Scanner {
                 }
             }
 
+            // strings
             '"' => {
                 while self.peek() != '"' && !self.at_end_input() {
                     if self.peek() == '\n' {
@@ -133,6 +128,7 @@ impl Scanner {
 
             ' ' | '\r' | '\t' => (),
             '\n' => self.line += 1,
+
             _ => {
                 if c.is_digit(10) {
                     self.add_num_token()
@@ -144,7 +140,7 @@ impl Scanner {
                     let text = self.source[self.start..self.current].to_string();
                     let kind = match self.keywords.get(&text) {
                         Some(k) => *k,
-                        None => TokenType::Identifier
+                        None => TokenType::Identifier,
                     };
 
                     self.add_token(kind)

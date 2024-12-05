@@ -5,10 +5,12 @@ use scanner::Scanner;
 mod scanner;
 mod token;
 mod token_type;
+mod expr;
 
 fn main() {
     let mut lox = Lox::new();
-    lox.run("file.txt");
+    lox.run("file.lox");
+
 }
 
 struct Lox {
@@ -22,13 +24,13 @@ impl Lox {
     }
 
     fn run(&mut self, source: &str) {
-        let source = source.to_string();
         let source = fs::read_to_string(source).unwrap();
+        let source = source.to_string();
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
         for token in tokens {
-            print!("{}", token.to_string());
+            print!("_{}", token.to_string());
         }
     }
 }

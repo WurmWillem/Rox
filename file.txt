@@ -1,3 +1,0 @@
-var x = 523
-var y = "yo, yo, yo"
-vara
