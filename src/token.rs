@@ -29,8 +29,8 @@ impl Token {
         match &self.literal {
             Literal::Str(s) => s.clone(),
             Literal::Num(n) => n.to_string(),
-            /* _ => self.lexeme.clone(), */
-            _ => "".to_string(),
+            _ => self.lexeme.clone(),
+            /* _ => "".to_string(), */
         }
         //self.lexeme.clone()
     }

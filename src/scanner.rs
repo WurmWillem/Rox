@@ -143,9 +143,9 @@ impl Scanner {
                         None => TokenType::Identifier,
                     };
 
-                    self.add_token(kind)
+                    self.add_token(kind);
                 } else {
-                    error(self.line, "unexpected character, seems like a skill issue");
+                    error(self.line, "unexpected character, seems like a skill issue"); 
                 }
             }
         }
@@ -175,6 +175,7 @@ impl Scanner {
         let text = self.source[self.start..self.current].to_string();
         self.tokens.push(Token::new(kind, text, lit, self.line));
     }
+
     fn add_token(&mut self, kind: TokenType) {
         self.add_lit_token(kind, Literal::None)
     }

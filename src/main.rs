@@ -30,7 +30,7 @@ impl Lox {
 
         let tokens = scanner.scan_tokens();
         for token in tokens {
-            print!("_{}", token.to_string());
+            print!("{}", token.to_string());
         }
     }
 }
