@@ -1,20 +1,22 @@
 use crate::token_type::TokenType;
 
-#[derive( Clone)]
-pub struct Token {
-    pub kind: TokenType,
-    lexeme: String,
-    literal: Literal,
-    line: usize,
-}
-
 #[derive(Debug, Clone)]
 pub enum Literal {
     None,
     Str(String),
     Num(f64),
+    True,
+    False,
+    Nil,
 }
 
+#[derive(Clone)]
+pub struct Token {
+    pub kind: TokenType,
+    lexeme: String,
+    pub literal: Literal,
+    line: usize,
+}
 impl Token {
     pub fn new(kind: TokenType, lexeme: String, literal: Literal, line: usize) -> Self {
         Self {

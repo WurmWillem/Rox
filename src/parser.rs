@@ -1,4 +1,8 @@
-use crate::{expr::Expr, token::Token, token_type::TokenType};
+use crate::{
+    expr::Expr,
+    token::{Literal, Token},
+    token_type::TokenType,
+};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -28,8 +32,78 @@ impl Parser {
         expr
     }
 
-    fn comparison(&self) -> Expr {
-        todo!()
+    fn comparison(&mut self) -> Expr {
+        let mut expr = self.term();
+
+        while self.same(vec![
+            TokenType::Greater,
+            TokenType::GreaterEqual,
+            TokenType::Less,
+            TokenType::LessEqual,
+        ]) {
+            let op = self.previous();
+            let right = self.term();
+            expr = Expr::Binary(Box::new(expr), op, Box::new(right));
+        }
+
+        expr
+    }
+
+    fn term(&mut self) -> Expr {
+        let mut expr = self.factor();
+
+        while self.same(vec![TokenType::Plus, TokenType::Minus]) {
+            let op = self.previous();
+            let right = self.factor();
+            expr = Expr::Binary(Box::new(expr), op, Box::new(right));
+        }
+
+        expr
+    }
+
+    fn factor(&mut self) -> Expr {
+        let mut expr = self.unary();
+
+        while self.same(vec![TokenType::Star, TokenType::Slash]) {
+            let op = self.previous();
+            let right = self.unary();
+            expr = Expr::Binary(Box::new(expr), op, Box::new(right));
+        }
+
+        expr
+    }
+
+    fn unary(&mut self) -> Expr {
+        if self.same(vec![TokenType::Bang, TokenType::Minus]) {
+            let op = self.previous();
+            let right = self.unary();
+            return Expr::Unary(op, Box::new(right));
+        }
+
+        self.primary()
+    }
+
+    fn primary(&mut self) -> Expr {
+        if self.same(vec![TokenType::True]) {
+            return Expr::Lit(Literal::True);
+        }
+        if self.same(vec![TokenType::False]) {
+            return Expr::Lit(Literal::False);
+        }
+        if self.same(vec![TokenType::Nil]) {
+            return Expr::Lit(Literal::Nil);
+        }
+
+        if self.same(vec![TokenType::Number, TokenType::String]) {
+            return Expr::Lit(self.previous().literal);
+        }
+
+        if self.same(vec![TokenType::LeftParen]) {
+            let expr = self.expression();
+            return Expr::Grouping(Box::new(expr));
+        }
+
+        panic!("unreachable");
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {
