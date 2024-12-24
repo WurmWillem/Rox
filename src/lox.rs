@@ -1,6 +1,5 @@
 use std::fs;
 
-use crate::stringify;
 use crate::{parser::Parser, scanner::Scanner};
 
 pub struct Lox {
@@ -26,13 +25,14 @@ impl Lox {
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
+        //for token in &tokens {
+        //    print!("{}_", token.to_string());
+        //}
+        //println!();
 
         let mut parser = Parser::new(tokens);
         let expr = parser.parse();
 
-        println!("{:?}", stringify(&expr));
-        //for token in tokens {
-        //    print!("{}", token.to_string());
-        //}
+        println!("{:?}", expr.stringify()); 
     }
 }
