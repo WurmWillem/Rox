@@ -1,11 +1,11 @@
-use std::{io, fs};
+use std::env;
 
 use colored::Colorize;
 use expr::Expr;
-use parser::Parser;
-use scanner::Scanner;
+use lox::Lox;
 
 mod expr;
+mod lox;
 mod parser;
 mod scanner;
 mod token;
@@ -13,44 +13,27 @@ mod token_type;
 
 fn main() {
     let mut lox = Lox::new();
-    let mut guess = String::new();
 
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read input");
+    let args: Vec<String> = env::args().collect();
+      //env::set_var("RUST_BACKTRACE", "1");
 
-    lox.run("file.lox");
-}
+    if args.len() == 1 {
+        // run lox code from a file
+        lox.run_file("file.lox");
+    } else {
+        // run lox code from a prompt
+        let mut input = String::new();
+        for i in 1..args.len() {
+            let arg = format!("{} ", args[i]);
+            input.push_str(&arg);
+        }
 
-struct Lox {
-    //had_error: bool,
-}
-
-impl Lox {
-    fn new() -> Self {
-        //Self { had_error: false }
-        Self {}
-    }
-
-    fn run(&mut self, source: &str) {
-        let source = fs::read_to_string(source).unwrap();
-        let source = source.to_string();
-        let mut scanner = Scanner::new(source);
-
-        let tokens = scanner.scan_tokens();
-
-        let mut parser = Parser::new(tokens);
-        let expr = parser.parse();
-
-        println!("{:?}", stringify(&expr));
-
-        //for token in tokens {
-        //    print!("{}", token.to_string());
-        //}
+        println!("{}", input);
+        lox.run_prompt(input);
     }
 }
 
-fn stringify(expr: &Expr) -> String {
+pub fn stringify(expr: &Expr) -> String {
     match expr {
         Expr::Lit(lit) => lit.to_string(),
         Expr::Grouping(expr) => {

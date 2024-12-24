@@ -115,6 +115,7 @@ impl Parser {
             return Expr::Grouping(Box::new(expr));
         }
 
+        println!("{:?}", self.peek().kind);
         error(self.peek().line, "Expected expression.");
         panic!("the previous line called panic!, so this line is unreachable.");
     }
