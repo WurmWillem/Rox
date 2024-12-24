@@ -13,6 +13,22 @@ pub enum Value {
     Num(f64),
     Str(String),
 }
+impl Value {
+   fn to_string(&self) -> String {
+        match self {
+            Value::Nil => "nil".to_string(),
+            Value::True => "true".to_string(),
+            Value::False => "false".to_string(),
+            Value::Num(num) => num.to_string(),
+            Value::Str(str) => str.to_string(),
+        }
+    } 
+}
+
+pub fn interpret(expr: Expr) {
+    let value = evaluate(expr);
+    println!("{}", value.to_string());
+}
 
 fn evaluate(expr: Expr) -> Value {
     match expr {
@@ -82,6 +98,7 @@ fn evaluate(expr: Expr) -> Value {
                 TokenType::Less => apply_logic_to_nums!(Less, <),
                 TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
                 TokenType::Equal => apply_logic_to_nums!(Equal, ==),
+                TokenType::EqualEqual => apply_logic_to_nums!(EqualEqual, ==),
                 TokenType::BangEqual => apply_logic_to_nums!(BangEqaul, !=),
                 _ => panic!("Unreachable"),
             }
@@ -97,12 +114,6 @@ fn is_false(value: Value) -> Value {
     }
 }
 
-fn checkNumOperand(token: Token, operand: Value) {
-    match operand {
-        Value::Num(_) => return,
-        _ => crash(token.line, "Operand must be a number."),
-    }
-}
 //pub struct Interpreter {}
 //impl Interpreter {
 //   fn () {

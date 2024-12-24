@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::{parser::Parser, scanner::Scanner};
+use crate::{interpreter::interpret, parser::Parser, scanner::Scanner};
 
 pub struct Lox {
     //had_error: bool,
@@ -32,7 +32,9 @@ impl Lox {
 
         let mut parser = Parser::new(tokens);
         let expr = parser.parse();
+        //println!("{:?}", expr.stringify()); 
 
-        println!("{:?}", expr.stringify()); 
+        interpret(expr);
+
     }
 }
