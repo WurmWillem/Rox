@@ -40,12 +40,26 @@ fn evaluate(expr: Expr) -> Value {
             let left = evaluate(*left);
             let right = evaluate(*right);
 
-            macro_rules! apply_op_to_num {
+            macro_rules! apply_arith_to_nums {
                 ($type: ident, $op: tt) => {
                     if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                         Value::Num(num1 $op num2)
                     } else {
-                        crash(op.line, concat!(stringify!($type), " can only be applied to numbers."))
+                        crash(op.line, concat!(stringify!($tt), " can only be applied to numbers."))
+                    }
+                };
+            }
+
+            macro_rules! apply_logic_to_nums {
+                ($type: ident, $op: tt) => {
+                    if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
+                        if num1 $op num2 {
+                            Value::True
+                        } else {
+                            Value::False
+                        }
+                    } else {
+                        crash(op.line, concat!(stringify!($tt), " can only be applied to numbers."));
                     }
                 };
             }
@@ -57,11 +71,18 @@ fn evaluate(expr: Expr) -> Value {
                     } else if let (Value::Str(str1), Value::Str(str2)) = (left, right) {
                         return Value::Str(format!("{}{}", str1, str2));
                     }
-                    crash(op.line, "Plus can only be applied to numbers.")
+                    crash(op.line, "Plus can only be applied to numbers.");
                 }
-                TokenType::Minus => apply_op_to_num!(Minus, -),
-                TokenType::Star => apply_op_to_num!(Star, *),
-                TokenType::Slash => apply_op_to_num!(Slash, /),
+                TokenType::Minus => apply_arith_to_nums!(Minus, -),
+                TokenType::Star => apply_arith_to_nums!(Star, *),
+                TokenType::Slash => apply_arith_to_nums!(Slash, /),
+
+                TokenType::Greater => apply_logic_to_nums!(Greater, >),
+                TokenType::GreaterEqual => apply_logic_to_nums!(GreaterEqual, >=),
+                TokenType::Less => apply_logic_to_nums!(Less, <),
+                TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
+                TokenType::Equal => apply_logic_to_nums!(Equal, ==),
+                TokenType::BangEqual => apply_logic_to_nums!(BangEqaul, !=),
                 _ => panic!("Unreachable"),
             }
         }
