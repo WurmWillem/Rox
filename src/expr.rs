@@ -1,5 +1,6 @@
 use crate::token::{Literal, Token};
 
+#[derive(Clone)]
 pub enum Expr {
     Lit(Literal),
     Grouping(Box<Expr>),

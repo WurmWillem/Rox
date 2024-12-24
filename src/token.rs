@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use crate::token_type::TokenType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     None,
     Str(String),
@@ -9,13 +11,25 @@ pub enum Literal {
     False,
     Nil,
 }
+impl Display for Literal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Literal::None => write!(f, "None"),
+            Literal::Str(s) => write!(f, "{}", s),
+            Literal::Num(n) => write!(f, "{}", n),
+            Literal::True => write!(f, "true"),
+            Literal::False => write!(f, "false"),
+            Literal::Nil => write!(f, "nil"),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct Token {
     pub kind: TokenType,
-    lexeme: String,
+    pub lexeme: String,
     pub literal: Literal,
-    line: usize,
+    pub line: usize,
 }
 impl Token {
     pub fn new(kind: TokenType, lexeme: String, literal: Literal, line: usize) -> Self {

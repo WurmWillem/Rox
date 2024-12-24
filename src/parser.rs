@@ -1,4 +1,5 @@
 use crate::{
+    error,
     expr::Expr,
     token::{Literal, Token},
     token_type::TokenType,
@@ -9,11 +10,15 @@ pub struct Parser {
     current: usize,
 }
 impl Parser {
-    pub fn new() -> Parser {
+    pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
-            tokens: vec![],
+            tokens,
             current: 0,
         }
+    }
+
+    pub fn parse(&mut self) -> Expr {
+       self.expression()
     }
 
     fn expression(&mut self) -> Expr {
@@ -100,10 +105,17 @@ impl Parser {
 
         if self.same(vec![TokenType::LeftParen]) {
             let expr = self.expression();
+
+            if self.check(TokenType::RightParen) {
+                self.advance();
+            } else {
+                error(self.peek().line, "Expected ')' after expression.");
+            }
+
             return Expr::Grouping(Box::new(expr));
         }
 
-        panic!("unreachable");
+        panic!("Expected expression.");
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {

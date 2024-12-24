@@ -1,17 +1,19 @@
 use std::fs;
 
+use expr::Expr;
+use parser::Parser;
 use scanner::Scanner;
+use token::Literal;
 
-mod scanner;
+mod expr;
 mod parser;
+mod scanner;
 mod token;
 mod token_type;
-mod expr;
 
 fn main() {
     let mut lox = Lox::new();
     lox.run("file.lox");
-
 }
 
 struct Lox {
@@ -30,10 +32,46 @@ impl Lox {
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
-        for token in tokens {
-            print!("{}", token.to_string());
+
+        let mut parser = Parser::new(tokens);
+        let expr = parser.parse();
+
+        println!("{:?}", stringify(&expr));
+
+        //for token in tokens {
+        //    print!("{}", token.to_string());
+        //}
+    }
+}
+
+fn stringify(expr: &Expr) -> String {
+    match expr {
+        Expr::Lit(lit) => lit.to_string(),
+        Expr::Grouping(expr) => {
+            let expr = *expr.clone();
+            parenthesize("group".to_owned(), vec![expr])
+        }
+        Expr::Unary(token, expr) => {
+            let expr = *expr.clone();
+            parenthesize(token.lexeme.clone(), vec![expr])
+        }
+        Expr::Binary(left, token, right) => {
+            let left = *left.clone();
+            let right = *right.clone();
+            parenthesize(token.lexeme.clone(), vec![left, right])
         }
     }
+}
+
+fn parenthesize(name: String, exprs: Vec<Expr>) -> String {
+    let mut out = format!("({}", name.clone());
+
+    for i in 0..exprs.len() {
+        out.push_str(&stringify(&exprs[i]));
+    }
+
+    out.push_str(")");
+    out
 }
 
 pub fn error(line: usize, message: &str) {

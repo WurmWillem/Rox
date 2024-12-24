@@ -114,7 +114,7 @@ impl Scanner {
                     self.current += 1;
                 }
                 if self.at_end_input() {
-                    error(self.line, "Unterminated string, bozo");
+                    error(self.line, "Unterminated string, bozo.");
                     return;
                 }
 
@@ -145,7 +145,7 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    error(self.line, "unexpected character, seems like a skill issue"); 
+                    error(self.line, "unexpected character, seems like a skill issue."); 
                 }
             }
         }
