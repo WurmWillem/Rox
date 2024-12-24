@@ -1,10 +1,10 @@
 use std::env;
 
 use colored::Colorize;
-use expr::Expr;
 use lox::Lox;
 
 mod expr;
+mod interpreter;
 mod lox;
 mod parser;
 mod scanner;
@@ -33,7 +33,7 @@ fn main() {
     }
 }
 
-pub fn error(line: usize, message: &str) {
+pub fn error(line: usize, message: &str) -> ! {
     let l = "[line ".blue();
     let i = "] Error: ".blue();
     let message = message.red();

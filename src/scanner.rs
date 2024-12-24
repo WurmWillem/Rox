@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::error;
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
 
@@ -114,7 +113,14 @@ impl Scanner {
                     self.current += 1;
                 }
                 if self.at_end_input() {
-                    error(self.line, "Unterminated string, bozo.");
+                    {
+                        let line = self.line;
+                        let l = "[line ".blue();
+                        let i = "] Error: ".blue();
+                        let message = "Unterminated string, bozo.".red();
+                        panic!("{}{}{}{}", l, line, i, message);
+                        //panic!("[line {}] Error: {}", line, message);
+                    };
                     return;
                 }
 
@@ -145,7 +151,14 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    error(self.line, "unexpected character, seems like a skill issue."); 
+                    {
+                        let line = self.line;
+                        let l = "[line ".blue();
+                        let i = "] Error: ".blue();
+                        let message = "unexpected character, seems like a skill issue.".red();
+                        panic!("{}{}{}{}", l, line, i, message);
+                        //panic!("[line {}] Error: {}", line, message);
+                    }; 
                 }
             }
         }

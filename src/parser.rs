@@ -115,9 +115,8 @@ impl Parser {
             return Expr::Grouping(Box::new(expr));
         }
 
-        //println!("{:?}", self.peek().kind);
+        println!("Did not expect token of type {:?}", self.peek().kind);
         error(self.peek().line, "Expected expression.");
-        panic!("the previous line called panic!, so this line is unreachable.");
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {
