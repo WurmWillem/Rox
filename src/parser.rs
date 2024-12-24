@@ -115,7 +115,8 @@ impl Parser {
             return Expr::Grouping(Box::new(expr));
         }
 
-        panic!("Expected expression.");
+        error(self.peek().line, "Expected expression.");
+        panic!("the previous line called panic!, so this line is unreachable.");
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {

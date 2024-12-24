@@ -1,9 +1,9 @@
-use std::fs;
+use std::{io, fs};
 
+use colored::Colorize;
 use expr::Expr;
 use parser::Parser;
 use scanner::Scanner;
-use token::Literal;
 
 mod expr;
 mod parser;
@@ -13,6 +13,12 @@ mod token_type;
 
 fn main() {
     let mut lox = Lox::new();
+    let mut guess = String::new();
+
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read input");
+
     lox.run("file.lox");
 }
 
@@ -67,6 +73,7 @@ fn parenthesize(name: String, exprs: Vec<Expr>) -> String {
     let mut out = format!("({}", name.clone());
 
     for i in 0..exprs.len() {
+        out.push_str(" ");
         out.push_str(&stringify(&exprs[i]));
     }
 
@@ -75,5 +82,9 @@ fn parenthesize(name: String, exprs: Vec<Expr>) -> String {
 }
 
 pub fn error(line: usize, message: &str) {
-    panic!("[line {}] Error: {}", line, message);
+    let l = "[line ".blue();
+    let i = "] Error: ".blue();
+    let message = message.red();
+    panic!("{}{}{}{}", l, line, i, message);
+    //panic!("[line {}] Error: {}", line, message);
 }
