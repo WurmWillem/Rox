@@ -2,7 +2,7 @@ use crate::token_type::TokenType;
 
 #[derive( Clone)]
 pub struct Token {
-    kind: TokenType,
+    pub kind: TokenType,
     lexeme: String,
     literal: Literal,
     line: usize,

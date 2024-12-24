@@ -3,6 +3,7 @@ use std::fs;
 use scanner::Scanner;
 
 mod scanner;
+mod parser;
 mod token;
 mod token_type;
 mod expr;
