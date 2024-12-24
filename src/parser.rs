@@ -1,5 +1,5 @@
 use crate::{
-    error,
+    crash,
     expr::Expr,
     token::{Literal, Token},
     token_type::TokenType,
@@ -109,14 +109,14 @@ impl Parser {
             if self.check(TokenType::RightParen) {
                 self.advance();
             } else {
-                error(self.peek().line, "Expected ')' after expression.");
+                crash(self.peek().line, "Expected ')' after expression.");
             }
 
             return Expr::Grouping(Box::new(expr));
         }
 
         println!("Did not expect token of type {:?}", self.peek().kind);
-        error(self.peek().line, "Expected expression.");
+        crash(self.peek().line, "Expected expression.");
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {

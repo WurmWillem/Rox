@@ -4,8 +4,8 @@ use colored::Colorize;
 use lox::Lox;
 
 mod expr;
-mod interpreter;
 mod lox;
+mod interpreter;
 mod parser;
 mod scanner;
 mod token;
@@ -33,7 +33,7 @@ fn main() {
     }
 }
 
-pub fn error(line: usize, message: &str) -> ! {
+pub fn crash(line: usize, message: &str) -> ! {
     let l = "[line ".blue();
     let i = "] Error: ".blue();
     let message = message.red();
