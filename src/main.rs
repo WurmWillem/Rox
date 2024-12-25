@@ -3,6 +3,7 @@ use std::env;
 use colored::Colorize;
 use lox::Lox;
 
+mod stmt;
 mod expr;
 mod lox;
 mod interpreter;

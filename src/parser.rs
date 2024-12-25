@@ -1,6 +1,7 @@
 use crate::{
     crash,
     expr::Expr,
+    stmt::Stmt,
     token::{Literal, Token},
     token_type::TokenType,
 };
@@ -11,14 +12,34 @@ pub struct Parser {
 }
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
-        Parser {
-            tokens,
-            current: 0,
-        }
+        Parser { tokens, current: 0 }
     }
 
-    pub fn parse(&mut self) -> Expr {
-       self.expression()
+    pub fn parse(&mut self) -> Vec<Stmt> {
+        let mut statements = Vec::new();
+        while !self.is_at_end() {
+            statements.push(self.statement());
+        }
+        statements
+    }
+
+    fn statement(&mut self) -> Stmt {
+        if self.same(vec![TokenType::Print]) {
+            return self.print_statement();
+        }
+        self.expr_statement()
+    }
+
+    fn print_statement(&mut self) -> Stmt {
+        let expr = self.expression();
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        Stmt::Print(expr)
+    }
+
+    fn expr_statement(&mut self) -> Stmt {
+        let expr = self.expression();
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        Stmt::Expr(expr)
     }
 
     fn expression(&mut self) -> Expr {
@@ -105,18 +126,24 @@ impl Parser {
 
         if self.same(vec![TokenType::LeftParen]) {
             let expr = self.expression();
-
-            if self.check(TokenType::RightParen) {
-                self.advance();
-            } else {
-                crash(self.peek().line, "Je bent de ')' vergeten (je mag niet meer op mijn kinderfeestje komen)");
-            }
+            self.consume(
+                TokenType::RightParen,
+                "Je bent de ')' vergeten (je mag niet meer op mijn kinderfeestje komen)",
+            );
 
             return Expr::Grouping(Box::new(expr));
         }
 
         let str = format!("{:?} past hier niet oelewapper.", self.peek().kind);
         crash(self.peek().line, &str);
+    }
+
+    fn consume(&mut self, token_type: TokenType, msg: &str) {
+        if self.check(token_type) {
+            self.advance();
+        } else {
+            crash(self.peek().line, msg);
+        }
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {

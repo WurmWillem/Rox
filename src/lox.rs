@@ -37,11 +37,11 @@ impl Lox {
         }
 
         let mut parser = Parser::new(tokens);
-        let expr = parser.parse();
+        let statements = parser.parse();
         if PRINT_PARS_OUTPUT {
-            println!("{:?}", expr.stringify());
+            //println!("{:?}", expr.stringify());
         }
 
-        interpret(expr);
+        interpret(statements);
     }
 }

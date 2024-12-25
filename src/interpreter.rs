@@ -1,4 +1,4 @@
-use crate::{crash, expr::Expr, token::Literal, token_type::TokenType};
+use crate::{crash, expr::Expr, stmt::Stmt, token::Literal, token_type::TokenType};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -9,7 +9,7 @@ pub enum Value {
     Str(String),
 }
 impl Value {
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         match self {
             Value::Nil => "niks".to_string(),
             Value::True => "wellus".to_string(),
@@ -45,17 +45,18 @@ impl Value {
     }
 }
 
-pub fn interpret(expr: Expr) {
-    let value = evaluate(expr);
-    println!("{}", value.to_string());
+pub fn interpret(statements: Vec<Stmt>) {
+    for i in 0..statements.len()  {
+        statements[i].evaluate();
+    }
 }
 
-fn evaluate(expr: Expr) -> Value {
+pub fn evaluate(expr: &Expr) -> Value {
     match expr {
         Expr::Lit(lit) => Value::from_lit(&lit),
-        Expr::Grouping(expr) => evaluate(*expr),
+        Expr::Grouping(expr) => evaluate(expr),
         Expr::Unary(token, expr) => {
-            let right = evaluate(*expr);
+            let right = evaluate(expr);
 
             match token.kind {
                 TokenType::Minus => match right {
@@ -67,8 +68,8 @@ fn evaluate(expr: Expr) -> Value {
             }
         }
         Expr::Binary(left, op, right) => {
-            let left = evaluate(*left);
-            let right = evaluate(*right);
+            let left = evaluate(left);
+            let right = evaluate(right);
 
             macro_rules! apply_arith_to_nums {
                 ($type: ident, $op: tt) => {
