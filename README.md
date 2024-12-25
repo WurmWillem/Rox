@@ -1,14 +1,14 @@
-<H1> Rox: A Refreshingly Simple Programming Language </H1>
+<H1> Rox: A Refreshingly Simple And Dutch Programming Language </H1>
 
 <H2>Introducing Rox 🦀</H2>
-This is my implementation of Lox, a programming language so simple that even your little sister can program in it. As of right now the language (if you can even call it that) is extremely bare-bones, but it is improving rapidly. The goal of Lox is not to create a fully-functioning language for commercial use; it is simply the hobby project of a mediocre Rust programmer.
+This is my implementation of Lox, a programming language so simple and Dutch that even your little sister can program in it. As of right now the language (if you can even call it that) is extremely bare-bones, but it is improving rapidly. The goal of Lox is not to create a fully-functioning language for commercial use; it is simply the hobby project of a mediocre Rust programmer.
 
 <H2>Why should you use Rox?</H2>
 
+- 🇳🇱 Je bent een Nederlander in hart en nieren
 -  🚀 Blazingly fast and written in Rust  
 - 😃 Because you are a masochist
 - 🥰 You want to support me
-- 🇳🇱 Je bent een Nederlander in hart en nieren
 
 <H2>Features</H2>
 
