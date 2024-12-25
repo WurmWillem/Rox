@@ -66,3 +66,4 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   - Most of my homies hate null
 - /* */ support
 - multiplication on strings
+- '^' operator, e.g. 2^3 == 8
