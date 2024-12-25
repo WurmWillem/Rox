@@ -8,11 +8,12 @@ This is my implementation of Lox, a programming language so simple that even you
 -  🚀 Blazingly fast and written in Rust  
 - 😃 Because you are a masochist
 - 🥰 You want to support me
+- 🇳🇱 Je bent een Nederlander in hart en nieren
 
 <H2>Features</H2>
-
+- Beautiful Dutch syntax 🇳🇱 (wellus, nietus, ...)
 - Math with proper precedence rules
-  - Operators supported are +, -, *, /, (), //
+  - Operators supported are +, -, *, /, (), 
   ```
   3 * (2 + 3)
   output: 15
@@ -22,16 +23,19 @@ This is my implementation of Lox, a programming language so simple that even you
   
   ```
 - Logic operators that can be chained
-  - Logic operators supported are ==, >, <, >=, <= != 
+  - Logic operators supported are ==, >, <, >=, <= !=, !, //
   ```
   5 == 2 + 3
-  output: true
+  output: wellus
 
   1 < 3
-  output: true
+  output: wellus
 
   (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
-  output: true
+  output: wellus
+
+  wellus == !nietus == !!wellus
+  output: wellus
   ```
 
 <H2>How do I use Rox?</H2>
