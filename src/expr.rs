@@ -7,6 +7,7 @@ pub enum Expr {
     Unary(Token, Box<Expr>),
     Binary(Box<Expr>, Token, Box<Expr>),
 }
+// used for debugging purposes
 impl Expr {
     pub fn stringify(&self) -> String {
         match self {
@@ -27,6 +28,7 @@ impl Expr {
         }
     }
 }
+
 fn parenthesize(name: String, exprs: Vec<Expr>) -> String {
     let mut out = format!("({}", name.clone());
 

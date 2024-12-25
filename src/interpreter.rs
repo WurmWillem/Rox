@@ -1,9 +1,4 @@
-use crate::{
-    crash,
-    expr::Expr,
-    token::{Literal, Token},
-    token_type::TokenType,
-};
+use crate::{crash, expr::Expr, token::Literal, token_type::TokenType};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -14,7 +9,7 @@ pub enum Value {
     Str(String),
 }
 impl Value {
-   fn to_string(&self) -> String {
+    fn to_string(&self) -> String {
         match self {
             Value::Nil => "nil".to_string(),
             Value::True => "true".to_string(),
@@ -22,7 +17,32 @@ impl Value {
             Value::Num(num) => num.to_string(),
             Value::Str(str) => str.to_string(),
         }
-    } 
+    }
+
+    fn from_lit(lit: &Literal) -> Self {
+        match lit {
+            Literal::None => panic!("unreachable"),
+            Literal::Str(str) => Value::Str(str.clone()),
+            Literal::Num(num) => Value::Num(*num),
+            Literal::True => Value::True,
+            Literal::False => Value::False,
+            Literal::Nil => Value::Nil,
+        }
+    }
+
+    fn from_bool(is_true: bool) -> Value {
+        if is_true {
+            return Value::True;
+        }
+        Value::False
+    }
+
+    fn is_true(&self) -> bool {
+        match self {
+            Value::False | Value::Nil => false,
+            _ => true,
+        }
+    }
 }
 
 pub fn interpret(expr: Expr) {
@@ -32,14 +52,7 @@ pub fn interpret(expr: Expr) {
 
 fn evaluate(expr: Expr) -> Value {
     match expr {
-        Expr::Lit(lit) => match lit {
-            Literal::None => panic!("unreachable"),
-            Literal::Str(str) => Value::Str(str),
-            Literal::Num(num) => Value::Num(num),
-            Literal::True => Value::True,
-            Literal::False => Value::False,
-            Literal::Nil => Value::Nil,
-        },
+        Expr::Lit(lit) => Value::from_lit(&lit),
         Expr::Grouping(expr) => evaluate(*expr),
         Expr::Unary(token, expr) => {
             let right = evaluate(*expr);
@@ -48,7 +61,7 @@ fn evaluate(expr: Expr) -> Value {
                     Value::Num(num) => Value::Num(-num),
                     _ => crash(token.line, "Minus can only be applied to numbers."),
                 },
-                TokenType::Bang => is_false(right),
+                TokenType::Bang => Value::from_bool(!right.is_true()),
                 _ => panic!("Unreachable."),
             }
         }
@@ -61,7 +74,7 @@ fn evaluate(expr: Expr) -> Value {
                     if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                         Value::Num(num1 $op num2)
                     } else {
-                        crash(op.line, concat!(stringify!($tt), " can only be applied to numbers."))
+                        crash(op.line, concat!(stringify!($op), " can only be applied to numbers."))
                     }
                 };
             }
@@ -69,13 +82,9 @@ fn evaluate(expr: Expr) -> Value {
             macro_rules! apply_logic_to_nums {
                 ($type: ident, $op: tt) => {
                     if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
-                        if num1 $op num2 {
-                            Value::True
-                        } else {
-                            Value::False
-                        }
+                        Value::from_bool(num1 $op num2)
                     } else {
-                        crash(op.line, concat!(stringify!($tt), " can only be applied to numbers."));
+                        crash(op.line, concat!(stringify!($op), " can only be applied to numbers."));
                     }
                 };
             }
@@ -98,25 +107,21 @@ fn evaluate(expr: Expr) -> Value {
                 TokenType::Less => apply_logic_to_nums!(Less, <),
                 TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
                 TokenType::Equal => apply_logic_to_nums!(Equal, ==),
-                TokenType::EqualEqual => apply_logic_to_nums!(EqualEqual, ==),
-                TokenType::BangEqual => apply_logic_to_nums!(BangEqaul, !=),
+                TokenType::EqualEqual => Value::from_bool(is_equal(&left, &right)),
+                TokenType::BangEqual => Value::from_bool(!is_equal(&left, &right)),
                 _ => panic!("Unreachable"),
             }
         }
     }
 }
 
-// inverse of crafting interpreters implementation!
-fn is_false(value: Value) -> Value {
-    match value {
-        Value::False | Value::Nil => Value::True,
-        _ => Value::False,
+fn is_equal(value1: &Value, value2: &Value) -> bool {
+    match (value1, value2) {
+        (Value::Nil, Value::Nil) => true,
+        (Value::True, Value::True) => true,
+        (Value::False, Value::False) => true,
+        (Value::Num(num1), Value::Num(num2)) => num1 == num2,
+        (Value::Str(str1), Value::Str(str2)) => str1 == str2,
+        _ => false,
     }
 }
-
-//pub struct Interpreter {}
-//impl Interpreter {
-//   fn () {
-//
-//    }
-//}

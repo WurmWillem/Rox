@@ -146,14 +146,7 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    {
-                        let line = self.line;
-                        let l = "[line ".blue();
-                        let i = "] Error: ".blue();
-                        let message = "unexpected character, seems like a skill issue.".red();
-                        panic!("{}{}{}{}", l, line, i, message);
-                        //panic!("[line {}] Error: {}", line, message);
-                    };
+                    crash(self.line, "unexpected character, seems like a skill issue.");
                 }
             }
         }
@@ -202,7 +195,6 @@ impl Scanner {
         }
 
         let num = self.source[(self.start + 0)..(self.current - 0)].to_string();
-        //println!("{}", num);
         let num = num.parse::<f64>().unwrap();
         self.add_lit_token(TokenType::Number, Literal::Num(num))
     }

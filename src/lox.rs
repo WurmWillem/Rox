@@ -2,6 +2,10 @@ use std::fs;
 
 use crate::{interpreter::interpret, parser::Parser, scanner::Scanner};
 
+const PRINT_SCAN_OUTPUT :bool = false;
+const PRINT_PARS_OUTPUT :bool = false;
+//const PRINT_INTERPRETER :bool = false;
+
 pub struct Lox {
     //had_error: bool,
 }
@@ -25,16 +29,19 @@ impl Lox {
         let mut scanner = Scanner::new(source);
 
         let tokens = scanner.scan_tokens();
-        //for token in &tokens {
-        //    print!("{}_", token.to_string());
-        //}
-        //println!();
+        if PRINT_SCAN_OUTPUT {
+            for token in &tokens {
+                print!("{}_", token.to_string());
+            }
+            println!();
+        }
 
         let mut parser = Parser::new(tokens);
         let expr = parser.parse();
-        //println!("{:?}", expr.stringify()); 
+        if PRINT_PARS_OUTPUT {
+            println!("{:?}", expr.stringify());
+        }
 
         interpret(expr);
-
     }
 }
