@@ -1,6 +1,6 @@
 use crate::{
     crash,
-    expr::Expr,
+    expr::{self, Expr},
     stmt::Stmt,
     token::{Literal, Token},
     token_type::TokenType,
@@ -18,9 +18,28 @@ impl Parser {
     pub fn parse(&mut self) -> Vec<Stmt> {
         let mut statements = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.statement());
+            statements.push(self.declaration());
         }
         statements
+    }
+
+    fn declaration(&mut self) -> Stmt {
+        if self.same(vec![TokenType::Var]) {
+            return self.var_declaration();
+        }
+        self.statement()
+    }
+
+    fn var_declaration(&mut self) -> Stmt {
+        let name = self.consume(TokenType::Identifier, "Je moet wel een naam voor de var geven");
+
+        let mut  initializer = Expr::None;
+        if self.same(vec![TokenType::Equal]) {
+           initializer = self.expression(); 
+        }
+
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        Stmt::Var(name, initializer)
     }
 
     fn statement(&mut self) -> Stmt {
@@ -112,12 +131,12 @@ impl Parser {
     fn primary(&mut self) -> Expr {
         if self.same(vec![TokenType::True]) {
             return Expr::Lit(Literal::True);
-        }
-        if self.same(vec![TokenType::False]) {
+        } else if self.same(vec![TokenType::False]) {
             return Expr::Lit(Literal::False);
-        }
-        if self.same(vec![TokenType::Nil]) {
+        } else if self.same(vec![TokenType::Nil]) {
             return Expr::Lit(Literal::Nil);
+        } else if self.same(vec![TokenType::Identifier]) {
+            return todo!()
         }
 
         if self.same(vec![TokenType::Number, TokenType::String]) {
@@ -138,9 +157,9 @@ impl Parser {
         crash(self.peek().line, &str);
     }
 
-    fn consume(&mut self, token_type: TokenType, msg: &str) {
+    fn consume(&mut self, token_type: TokenType, msg: &str) -> Token {
         if self.check(token_type) {
-            self.advance();
+            self.advance()
         } else {
             crash(self.peek().line, msg);
         }

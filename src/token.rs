@@ -9,7 +9,8 @@ pub enum Literal {
     Num(f64),
     True,
     False,
-    Nil,
+    Nil
+    //Identifier,
 }
 impl Display for Literal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -20,6 +21,7 @@ impl Display for Literal {
             Literal::True => write!(f, "true"),
             Literal::False => write!(f, "false"),
             Literal::Nil => write!(f, "nil"),
+            //Literal::Identifier => write!(f, "{}", ),
         }
     }
 }

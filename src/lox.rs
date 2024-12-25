@@ -1,9 +1,9 @@
 use std::fs;
 
-use crate::{interpreter::interpret, parser::Parser, scanner::Scanner};
+use crate::{interpreter::Interpreter, parser::Parser, scanner::Scanner};
 
-const PRINT_SCAN_OUTPUT :bool = false;
-const PRINT_PARS_OUTPUT :bool = false;
+const PRINT_SCAN_OUTPUT: bool = false;
+const PRINT_PARS_OUTPUT: bool = false;
 //const PRINT_INTERPRETER :bool = false;
 
 pub struct Lox {
@@ -42,6 +42,8 @@ impl Lox {
             //println!("{:?}", expr.stringify());
         }
 
-        interpret(statements);
+        let mut interpreter = Interpreter::new();
+
+        interpreter.interpret(statements);
     }
 }
