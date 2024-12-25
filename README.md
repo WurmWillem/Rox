@@ -63,3 +63,5 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 - Add enums
 - Remove null and replace it with Option<T> enum
   - Most of my homies hate null
+- /* */ support
+- multiplication on strings
