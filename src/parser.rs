@@ -109,14 +109,14 @@ impl Parser {
             if self.check(TokenType::RightParen) {
                 self.advance();
             } else {
-                crash(self.peek().line, "Expected ')' after expression.");
+                crash(self.peek().line, "Je bent de ')' vergeten (je mag niet meer op mijn kinderfeestje komen)");
             }
 
             return Expr::Grouping(Box::new(expr));
         }
 
-        println!("Did not expect token of type {:?}", self.peek().kind);
-        crash(self.peek().line, "Expected expression.");
+        let str = format!("{:?} past hier niet oelewapper.", self.peek().kind);
+        crash(self.peek().line, &str);
     }
 
     fn same(&mut self, t: Vec<TokenType>) -> bool {

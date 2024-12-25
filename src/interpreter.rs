@@ -11,9 +11,9 @@ pub enum Value {
 impl Value {
     fn to_string(&self) -> String {
         match self {
-            Value::Nil => "nil".to_string(),
-            Value::True => "true".to_string(),
-            Value::False => "false".to_string(),
+            Value::Nil => "niks".to_string(),
+            Value::True => "wellus".to_string(),
+            Value::False => "nietus".to_string(),
             Value::Num(num) => num.to_string(),
             Value::Str(str) => str.to_string(),
         }
@@ -56,10 +56,11 @@ fn evaluate(expr: Expr) -> Value {
         Expr::Grouping(expr) => evaluate(*expr),
         Expr::Unary(token, expr) => {
             let right = evaluate(*expr);
+
             match token.kind {
                 TokenType::Minus => match right {
                     Value::Num(num) => Value::Num(-num),
-                    _ => crash(token.line, "Minus can only be applied to numbers."),
+                    _ => crash(token.line, "Min kan alleen worden gebruikt voor nummers, kaaskop"),
                 },
                 TokenType::Bang => Value::from_bool(!right.is_true()),
                 _ => panic!("Unreachable."),
@@ -74,7 +75,7 @@ fn evaluate(expr: Expr) -> Value {
                     if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                         Value::Num(num1 $op num2)
                     } else {
-                        crash(op.line, concat!(stringify!($op), " can only be applied to numbers."))
+                        crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"))
                     }
                 };
             }
@@ -84,7 +85,7 @@ fn evaluate(expr: Expr) -> Value {
                     if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                         Value::from_bool(num1 $op num2)
                     } else {
-                        crash(op.line, concat!(stringify!($op), " can only be applied to numbers."));
+                        crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"));
                     }
                 };
             }
@@ -96,7 +97,7 @@ fn evaluate(expr: Expr) -> Value {
                     } else if let (Value::Str(str1), Value::Str(str2)) = (left, right) {
                         return Value::Str(format!("{}{}", str1, str2));
                     }
-                    crash(op.line, "Plus can only be applied to numbers.");
+                    crash(op.line, "Plus kan alleen worden gebruikt voor nummers en strings, kaaskop");
                 }
                 TokenType::Minus => apply_arith_to_nums!(Minus, -),
                 TokenType::Star => apply_arith_to_nums!(Star, *),

@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use colored::Colorize;
-
 use crate::crash;
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
@@ -116,7 +114,7 @@ impl Scanner {
                     self.current += 1;
                 }
                 if self.at_end_input() {
-                    crash(self.line, "Unterminated string, bozo.");
+                    crash(self.line, "ongetermineerde reeks, appelflap");
                 }
 
                 self.current += 1;
@@ -146,7 +144,7 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    crash(self.line, "unexpected character, seems like a skill issue.");
+                    crash(self.line, "Onverwacht karakter, dat kan beter appelflap");
                 }
             }
         }
