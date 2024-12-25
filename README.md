@@ -11,18 +11,19 @@ This is my implementation of Lox, a programming language so simple that even you
 - 🇳🇱 Je bent een Nederlander in hart en nieren
 
 <H2>Features</H2>
+
 - Beautiful Dutch syntax 🇳🇱 (wellus, nietus, ...)
 - Math with proper precedence rules
   - Operators supported are +, -, *, /, (), 
-  
-    ```
-    3 * (2 + 3)
-    output: 15
+    
+  ```
+  3 * (2 + 3)
+  output: 15
       
   
-    1 + 6 / 3
-    output: 3
-    ```
+  1 + 6 / 3
+  output: 3
+  ```
 - Logic operators that can be chained
   - Logic operators supported are ==, >, <, >=, <= !=, !, //
   ```
