@@ -12,6 +12,7 @@ This is my implementation of Lox, a programming language so simple that even you
 <H2>Features</H2>
 
 - Math with proper precedence rules
+  - Operators supported are +, -, *, /, (), //
   ```
   3 * (2 + 3)
   output: 15
@@ -21,6 +22,7 @@ This is my implementation of Lox, a programming language so simple that even you
   
   ```
 - Logic operators that can be chained
+  - Logic operators supported are ==, >, <, >=, <= != 
   ```
   5 == 2 + 3
   output: true
