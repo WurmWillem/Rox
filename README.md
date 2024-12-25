@@ -13,6 +13,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 <H2>Features</H2>
 
 - Beautiful Dutch keywords 🇳🇱 (wellus, nietus, ...)
+- Memory safe, as it is written in 100% safe Rust
 - Arithmetic with proper precedence rules
   - Operators supported are +, -, *, /, (), 
     
