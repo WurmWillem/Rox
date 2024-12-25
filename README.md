@@ -9,6 +9,29 @@ This is my implementation of Lox, a programming language so simple that even you
 - 😃 Because you are a masochist
 - 🥰 You want to support me
 
+<H2>Features</H2>
+
+- Math with proper precedence rules
+  ```
+  3 * (2 + 3)
+  output: 15
+  
+  1 + 6 / 3
+  output: 3
+  
+  ```
+- Logic operators that can be chained
+  ```
+  5 == 2 + 3
+  output: true
+
+  1 < 3
+  output: true
+
+  (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
+  output: true
+  ```
+
 <H2>How do I use Rox?</H2>
 
 - Download the source code and either
