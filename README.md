@@ -12,8 +12,8 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 
 <H2>Features</H2>
 
-- Beautiful Dutch syntax 🇳🇱 (wellus, nietus, ...)
-- Math with proper precedence rules
+- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, ...)
+- Arithmetic with proper precedence rules
   - Operators supported are +, -, *, /, (), 
     
   ```
@@ -23,6 +23,9 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   
   1 + 6 / 3
   output: 3
+
+  "Hallo " + "Wereld!"
+  output: Hallo Wereld!
   ```
 - Logic operators that can be chained
   - Logic operators supported are ==, >, <, >=, <= !=, !, //
@@ -59,4 +62,4 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 - Make it an actually functioning language with variables and control flow 💀
 - Add enums
 - Remove null and replace it with Option<T> enum
-  - All my homies hate null
+  - Most of my homies hate null
