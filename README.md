@@ -12,52 +12,65 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 
 <H2>Features</H2>
 
-- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, ...)
+- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, laat, ...)
 - Memory safe, as it is written in 100% safe Rust
-- Arithmetic with proper precedence rules
-  - Operators supported are +, -, *, /, (), 
-    
-  ```
-  3 * (2 + 3)
-  output: 15
+- Expressive expressions
+  - Arithmetic with proper precedence rules
+    - Operators supported are +, -, *, /, (), 
       
+    ```
+    3 * (2 + 3)
+    output: 15
+        
+    
+    1 + 6 / 3
+    output: 3
   
-  1 + 6 / 3
-  output: 3
-
-  "Hallo " + "Wereld!"
-  output: Hallo Wereld!
+    "Hallo " + "Wereld!"
+    output: Hallo Wereld!
+    ```
+  - Logic operators that can be chained
+    - Logic operators supported are ==, >, <, >=, <= !=, !, //
+    ```
+    5 == 2 + 3
+    output: wellus
+  
+    1 < 3
+    output: wellus
+  
+    (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
+    output: wellus
+  
+    wellus == !nietus == !!wellus
+    output: wellus
+    ```
+-
+- Dynamically typed mutable variables
   ```
-- Logic operators that can be chained
-  - Logic operators supported are ==, >, <, >=, <= !=, !, //
-  ```
-  5 == 2 + 3
-  output: wellus
-
-  1 < 3
-  output: wellus
-
-  (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
-  output: wellus
-
-  wellus == !nietus == !!wellus
-  output: wellus
+  laat breedte = 3;
+  laat lengte = 5;
+  
+  spreek "oppervlakte = ";
+  roep breedte * lengte;
+  
+  output: oppervlakte = 15
   ```
 
 <H2>How do I use Rox?</H2>
+You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
 
-- Download the source code and either
-  - Download the source code and execute it with the command cargo run "expression" as such 
+
+
+- execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
   ```
-  cargo run "2 + 1"
-  output: 3
+  cargo run "1 + 1"
+  output: 2
   ```
-  - Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments
+- Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
   ```
   cargo run
-  output: 3
   ```
-- Ask me for a binary and I'll send you an executable for your platform
+
 <H2>Roadmap</H2>
 
 - Make it an actually functioning language with variables and control flow 💀
@@ -66,3 +79,4 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   - Most of my homies hate null
 - /* */ support
 - multiplication on strings
+- '^' operator, e.g. 2^3 == 8
