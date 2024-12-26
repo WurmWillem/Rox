@@ -49,6 +49,9 @@ impl Parser {
         if self.same(vec![TokenType::Print]) {
             return self.print_statement();
         }
+        if self.same(vec![TokenType::Println]) {
+            return self.println_statement();
+        }
         self.expr_statement()
     }
 
@@ -57,6 +60,13 @@ impl Parser {
         self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
         Stmt::Print(expr)
     }
+
+    fn println_statement(&mut self) -> Stmt {
+        let expr = self.expression();
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        Stmt::Println(expr)
+    }
+
 
     fn expr_statement(&mut self) -> Stmt {
         let expr = self.expression();

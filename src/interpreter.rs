@@ -1,7 +1,7 @@
 use core::panic;
 use std::collections::HashMap;
 
-use crate::{crash, expr::Expr, stmt::Stmt, token::Literal, token_type::TokenType};
+use crate::{crash, expr::Expr, stmt::Stmt, token::{self, Literal}, token_type::TokenType};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -61,11 +61,13 @@ impl Interpreter {
                 self.evaluate(expr);
             }
             Stmt::Print(expr) => {
-                println!("{:?}", self.evaluate(expr).to_string());
+                print!("{}", self.evaluate(expr).to_string());
+            }
+            Stmt::Println(expr) => {
+                println!("{}", self.evaluate(expr).to_string());
             }
             Stmt::Var(token, expr) => {
                 let value = self.evaluate(expr);
-                //println!("{:?}", token.lexeme);
                 self.vars.insert(token.lexeme.clone(), value);
             },
         }
@@ -73,7 +75,6 @@ impl Interpreter {
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
         for i in 0..statements.len() {
-            //println!("{:?}", statements[i].n);
             self.evaluate_stmt(&statements[i]);
         }
     }
@@ -148,7 +149,12 @@ impl Interpreter {
                     _ => panic!("Unreachable."),
                 }
             }
-            Expr::Var(token) => self.vars.get(&token.lexeme).unwrap().clone(),
+            Expr::Var(token) => {
+                match self.vars.get(&token.lexeme) {
+                    Some(value) => value.clone(),
+                    None => crash(token.line, &format!("{} is een onbekende variabele.", token.lexeme)),
+                }
+            }
             Expr::None => panic!("Unreachable."),
         }
     }

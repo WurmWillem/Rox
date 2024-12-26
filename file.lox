@@ -1,3 +1,5 @@
-laat x = 5;
-laat y = 3;
-spreek x + y;
+laat breedte = 3;
+laat lengte = 5;
+
+spreek "oppervlakte = ";
+spreek breedte * lengte;

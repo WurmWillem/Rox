@@ -39,6 +39,7 @@ pub enum TokenType {
     Nil,
     Or,
     Print,
+    Println,
     Return,
     Super,
     This,
