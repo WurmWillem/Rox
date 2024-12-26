@@ -19,6 +19,24 @@ impl Interpreter {
         }
     }
 
+    fn evaluate_stmt(&mut self, stmt: &Stmt) {
+        match stmt {
+            Stmt::Expr(expr) => {
+                self.evaluate_expr(expr);
+            }
+            Stmt::Print(expr) => {
+                print!("{}", self.evaluate_expr(expr).to_string());
+            }
+            Stmt::Println(expr) => {
+                println!("{}", self.evaluate_expr(expr).to_string());
+            }
+            Stmt::Var(token, expr) => {
+                let value = self.evaluate_expr(expr);
+                self.vars.insert(token.lexeme.clone(), value);
+            }
+        }
+    }
+
     pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
         match expr {
             Expr::Lit(lit) => Value::from_lit(&lit),
@@ -96,27 +114,7 @@ impl Interpreter {
                     &format!("{} is een onbekende variabele.", token.lexeme),
                 ),
             },
-            Expr::None => panic!("Unreachable."),
+            Expr::Nil => Value::Nil,
         }
     }
-
-    fn evaluate_stmt(&mut self, stmt: &Stmt) {
-        match stmt {
-            Stmt::Expr(expr) => {
-                self.evaluate_expr(expr);
-            }
-            Stmt::Print(expr) => {
-                print!("{}", self.evaluate_expr(expr).to_string());
-            }
-            Stmt::Println(expr) => {
-                println!("{}", self.evaluate_expr(expr).to_string());
-            }
-            Stmt::Var(token, expr) => {
-                let value = self.evaluate_expr(expr);
-                self.vars.insert(token.lexeme.clone(), value);
-            }
-        }
-    }
-
 }
-

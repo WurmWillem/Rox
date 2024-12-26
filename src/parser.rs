@@ -17,11 +17,6 @@ impl Parser {
 
     pub fn parse_expr(&mut self) -> Expr {
         self.expression()
-        //let mut statements = Vec::new();
-        //while !self.is_at_end() {
-        //    statements.push(self.declaration());
-        //}
-        //statements
     }
 
     pub fn parse_statements(&mut self) -> Vec<Stmt> {
@@ -45,7 +40,7 @@ impl Parser {
             "Je moet wel een naam aan de var geven",
         );
 
-        let mut initializer = Expr::None;
+        let mut initializer = Expr::Nil;
         if self.same(vec![TokenType::Equal]) {
             initializer = self.expression();
         }

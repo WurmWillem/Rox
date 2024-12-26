@@ -7,7 +7,7 @@ pub enum Expr {
     Unary(Token, Box<Expr>),
     Binary(Box<Expr>, Token, Box<Expr>),
     Var(Token),
-    None,
+    Nil,
 }
 // used for debugging purposes
 impl Expr {
@@ -28,7 +28,7 @@ impl Expr {
                 parenthesize(token.lexeme.clone(), vec![left, right])
             }
             Expr::Var(_) => todo!(),
-            Expr::None => todo!(),
+            Expr::Nil => todo!(),
         }
     }
 }

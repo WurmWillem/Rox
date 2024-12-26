@@ -1,7 +1,2 @@
-laat breedte = 3;
-laat lengte = 5;
-
-spreek "oppervlakte = ";
-roep breedte * lengte;
-laat breedte = "hey";
-roep breedte;
+laat x;
+spreek x;
