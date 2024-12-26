@@ -44,29 +44,31 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
     wellus == !nietus == !!wellus
     output: wellus
     ```
-- Variables
+- Dynamically typed mutable variables
   ```
   laat breedte = 3;
   laat lengte = 5;
   
   spreek "oppervlakte = ";
-  spreek breedte * lengte;
+  roep breedte * lengte;
+  
   output: oppervlakte = 15
   ```
 
 <H2>How do I use Rox?</H2>
+You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
 
-- Download the source code and either
-  - execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
+
+
+- execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
   ```
-  cargo run "2 + 1"
-  output: 3
+  cargo run "1 + 1"
+  output: 2
   ```
-  - Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
+- Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
   ```
   cargo run
   ```
-- Ask me for a binary and I'll send you an executable for your platform
 
 <H2>Roadmap</H2>
 
