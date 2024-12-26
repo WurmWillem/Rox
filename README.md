@@ -12,9 +12,9 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 
 <H2>Features</H2>
 
-- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, ...)
+- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, laat, ...)
 - Memory safe, as it is written in 100% safe Rust
-- Extensive expressions
+- Expressive expressions
   - Arithmetic with proper precedence rules
     - Operators supported are +, -, *, /, (), 
       
@@ -46,10 +46,12 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
     ```
 - Variables
   ```
-  laat x = 5;
-  laat y = 3;
-  spreek x * y;
-  output: 15
+  laat breedte = 3;
+  laat lengte = 5;
+  
+  spreek "oppervlakte = ";
+  spreek breedte * lengte;
+  output: oppervlakte = 15
   ```
 
 <H2>How do I use Rox?</H2>
