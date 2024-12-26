@@ -12,23 +12,6 @@ impl Interpreter {
             vars: HashMap::new(),
         }
     }
-    pub fn evaluate_stmt(&mut self, stmt: &Stmt) {
-        match stmt {
-            Stmt::Expr(expr) => {
-                self.evaluate_expr(expr);
-            }
-            Stmt::Print(expr) => {
-                print!("{}", self.evaluate_expr(expr).to_string());
-            }
-            Stmt::Println(expr) => {
-                println!("{}", self.evaluate_expr(expr).to_string());
-            }
-            Stmt::Var(token, expr) => {
-                let value = self.evaluate_expr(expr);
-                self.vars.insert(token.lexeme.clone(), value);
-            }
-        }
-    }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
         for i in 0..statements.len() {
@@ -101,8 +84,8 @@ impl Interpreter {
                     TokenType::Less => apply_logic_to_nums!(Less, <),
                     TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
                     TokenType::Equal => apply_logic_to_nums!(Equal, ==),
-                    TokenType::EqualEqual => Value::from_bool(is_equal(&left, &right)),
-                    TokenType::BangEqual => Value::from_bool(!is_equal(&left, &right)),
+                    TokenType::EqualEqual => Value::from_bool(Value::is_equal(&left, &right)),
+                    TokenType::BangEqual => Value::from_bool(!Value::is_equal(&left, &right)),
                     _ => panic!("Unreachable."),
                 }
             }
@@ -116,15 +99,24 @@ impl Interpreter {
             Expr::None => panic!("Unreachable."),
         }
     }
+
+    fn evaluate_stmt(&mut self, stmt: &Stmt) {
+        match stmt {
+            Stmt::Expr(expr) => {
+                self.evaluate_expr(expr);
+            }
+            Stmt::Print(expr) => {
+                print!("{}", self.evaluate_expr(expr).to_string());
+            }
+            Stmt::Println(expr) => {
+                println!("{}", self.evaluate_expr(expr).to_string());
+            }
+            Stmt::Var(token, expr) => {
+                let value = self.evaluate_expr(expr);
+                self.vars.insert(token.lexeme.clone(), value);
+            }
+        }
+    }
+
 }
 
-fn is_equal(value1: &Value, value2: &Value) -> bool {
-    match (value1, value2) {
-        (Value::Nil, Value::Nil) => true,
-        (Value::True, Value::True) => true,
-        (Value::False, Value::False) => true,
-        (Value::Num(num1), Value::Num(num2)) => num1 == num2,
-        (Value::Str(str1), Value::Str(str2)) => str1 == str2,
-        _ => false,
-    }
-}

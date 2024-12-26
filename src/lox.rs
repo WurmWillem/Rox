@@ -52,7 +52,6 @@ impl Lox {
         let statements = parser.parse_statements();
 
         let mut interpreter = Interpreter::new();
-
         interpreter.interpret(statements);
     }
 }

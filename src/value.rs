@@ -43,4 +43,15 @@ impl Value {
             _ => true,
         }
     }
+
+    pub fn is_equal(value1: &Value, value2: &Value) -> bool {
+        match (value1, value2) {
+            (Value::Nil, Value::Nil) => true,
+            (Value::True, Value::True) => true,
+            (Value::False, Value::False) => true,
+            (Value::Num(num1), Value::Num(num2)) => num1 == num2,
+            (Value::Str(str1), Value::Str(str2)) => str1 == str2,
+            _ => false,
+        }
+    }
 }
