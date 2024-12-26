@@ -28,7 +28,7 @@ impl Parser {
     }
 
     fn declaration(&mut self) -> Stmt {
-        if self.same(vec![TokenType::Var]) {
+        if self.matches(vec![TokenType::Var]) {
             return self.var_declaration();
         }
         self.statement()
@@ -40,20 +40,20 @@ impl Parser {
             "Je moet wel een naam aan de var geven",
         );
 
-        let mut initializer = Expr::Nil;
-        if self.same(vec![TokenType::Equal]) {
-            initializer = self.expression();
+        let mut value = Expr::Lit(Literal::Nil);
+        if self.matches(vec![TokenType::Equal]) {
+            value = self.expression();
         }
 
         self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
-        Stmt::Var(name, initializer)
+        Stmt::Var(name, value)
     }
 
     fn statement(&mut self) -> Stmt {
-        if self.same(vec![TokenType::Print]) {
+        if self.matches(vec![TokenType::Print]) {
             return self.print_statement();
         }
-        if self.same(vec![TokenType::Println]) {
+        if self.matches(vec![TokenType::Println]) {
             return self.println_statement();
         }
         self.expr_statement()
@@ -71,7 +71,6 @@ impl Parser {
         Stmt::Println(expr)
     }
 
-
     fn expr_statement(&mut self) -> Stmt {
         let expr = self.expression();
         self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
@@ -79,13 +78,29 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Expr {
-        self.equality()
+        self.assignment()
+    }
+
+    fn assignment(&mut self) -> Expr {
+        let expr = self.equality();
+
+        if self.matches(vec![TokenType::Equal]) {
+            let equals = self.previous();
+            let value = self.assignment();
+
+            match expr {
+                Expr::Var(name) => return Expr::Assign(name, Box::new(value)),
+                _ => crash(equals.line, "dit kan je niet assignen."),
+            }
+        }
+
+        expr
     }
 
     fn equality(&mut self) -> Expr {
         let mut expr = self.comparison();
 
-        while self.same(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
+        while self.matches(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
             let op = self.previous();
             let right = self.comparison();
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
@@ -97,7 +112,7 @@ impl Parser {
     fn comparison(&mut self) -> Expr {
         let mut expr = self.term();
 
-        while self.same(vec![
+        while self.matches(vec![
             TokenType::Greater,
             TokenType::GreaterEqual,
             TokenType::Less,
@@ -114,7 +129,7 @@ impl Parser {
     fn term(&mut self) -> Expr {
         let mut expr = self.factor();
 
-        while self.same(vec![TokenType::Plus, TokenType::Minus]) {
+        while self.matches(vec![TokenType::Plus, TokenType::Minus]) {
             let op = self.previous();
             let right = self.factor();
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
@@ -126,7 +141,7 @@ impl Parser {
     fn factor(&mut self) -> Expr {
         let mut expr = self.unary();
 
-        while self.same(vec![TokenType::Star, TokenType::Slash]) {
+        while self.matches(vec![TokenType::Star, TokenType::Slash]) {
             let op = self.previous();
             let right = self.unary();
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
@@ -136,7 +151,7 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Expr {
-        if self.same(vec![TokenType::Bang, TokenType::Minus]) {
+        if self.matches(vec![TokenType::Bang, TokenType::Minus]) {
             let op = self.previous();
             let right = self.unary();
             return Expr::Unary(op, Box::new(right));
@@ -146,23 +161,23 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Expr {
-        if self.same(vec![TokenType::True]) {
+        if self.matches(vec![TokenType::True]) {
             return Expr::Lit(Literal::True);
-        } else if self.same(vec![TokenType::False]) {
+        } else if self.matches(vec![TokenType::False]) {
             return Expr::Lit(Literal::False);
-        } else if self.same(vec![TokenType::Nil]) {
+        } else if self.matches(vec![TokenType::Nil]) {
             return Expr::Lit(Literal::Nil);
         }
 
-        if self.same(vec![TokenType::Identifier]) {
+        if self.matches(vec![TokenType::Identifier]) {
             return Expr::Var(self.previous());
         }
 
-        if self.same(vec![TokenType::Number, TokenType::String]) {
+        if self.matches(vec![TokenType::Number, TokenType::String]) {
             return Expr::Lit(self.previous().literal);
         }
 
-        if self.same(vec![TokenType::LeftParen]) {
+        if self.matches(vec![TokenType::LeftParen]) {
             let expr = self.expression();
             self.consume(
                 TokenType::RightParen,
@@ -184,7 +199,7 @@ impl Parser {
         }
     }
 
-    fn same(&mut self, t: Vec<TokenType>) -> bool {
+    fn matches(&mut self, t: Vec<TokenType>) -> bool {
         for i in 0..t.len() {
             if self.check(t[i]) {
                 self.advance();

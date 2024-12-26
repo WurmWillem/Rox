@@ -1,2 +1,17 @@
-laat x;
+laat x = 5;
+x = 3;
 spreek x;
+
+
+
+
+// laat x = 1 + 2;
+// scanner     -> Token[Var, x, equals, 1, +, 2, Semicolon]
+// parser      -> Stmt::Var(x, expr::binary(1, +, 2))
+// interpreter -> calculates 1 + 2 = 3, and adds (x, Value::3) to hash
+//
+// print(x)
+// scanner -> print, x
+// parser -> Stmt::print(x)
+// interpreter -> evaluates x by looking in hashmap for name x
+// and prints it

@@ -107,6 +107,8 @@ impl Interpreter {
                     _ => panic!("Unreachable."),
                 }
             }
+
+            // get value from variable name out of hashmap
             Expr::Var(token) => match self.vars.get(&token.lexeme) {
                 Some(value) => value.clone(),
                 None => crash(
@@ -114,7 +116,18 @@ impl Interpreter {
                     &format!("{} is een onbekende variabele.", token.lexeme),
                 ),
             },
-            Expr::Nil => Value::Nil,
+
+            // overwrite value from variable name out of hashmap
+            Expr::Assign(name, expr) => {
+                let new_value = self.evaluate_expr(expr);
+
+                match self.vars.get_mut(&name.lexeme) {
+                    Some(old_value) => *old_value = new_value.clone(),
+                    None =>  crash(name.line, &format!("{} is een onbekende variabele.", name.lexeme)),
+                }
+
+                new_value
+            }
         }
     }
 }
