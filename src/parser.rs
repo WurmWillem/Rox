@@ -1,6 +1,6 @@
 use crate::{
     crash,
-    expr::{self, Expr},
+    expr::Expr,
     stmt::Stmt,
     token::{Literal, Token},
     token_type::TokenType,
@@ -31,11 +31,14 @@ impl Parser {
     }
 
     fn var_declaration(&mut self) -> Stmt {
-        let name = self.consume(TokenType::Identifier, "Je moet wel een naam voor de var geven");
+        let name = self.consume(
+            TokenType::Identifier,
+            "Je moet wel een naam aan de var geven",
+        );
 
-        let mut  initializer = Expr::None;
+        let mut initializer = Expr::None;
         if self.same(vec![TokenType::Equal]) {
-           initializer = self.expression(); 
+            initializer = self.expression();
         }
 
         self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
@@ -135,8 +138,10 @@ impl Parser {
             return Expr::Lit(Literal::False);
         } else if self.same(vec![TokenType::Nil]) {
             return Expr::Lit(Literal::Nil);
-        } else if self.same(vec![TokenType::Identifier]) {
-            return todo!()
+        }
+
+        if self.same(vec![TokenType::Identifier]) {
+            return Expr::Var(self.previous());
         }
 
         if self.same(vec![TokenType::Number, TokenType::String]) {

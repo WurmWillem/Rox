@@ -1,3 +1,6 @@
+use core::panic;
+use std::collections::HashMap;
+
 use crate::{crash, expr::Expr, stmt::Stmt, token::Literal, token_type::TokenType};
 
 #[derive(Debug, Clone)]
@@ -45,10 +48,12 @@ impl Value {
     }
 }
 
-pub struct Interpreter {}
+pub struct Interpreter {
+   vars: HashMap<String, Value>, 
+}
 impl Interpreter {
     pub fn new() -> Self {
-       Self {  } 
+        Self { vars: HashMap::new() }
     }
     pub fn evaluate_stmt(&mut self, stmt: &Stmt) {
         match stmt {
@@ -58,12 +63,17 @@ impl Interpreter {
             Stmt::Print(expr) => {
                 println!("{:?}", self.evaluate(expr).to_string());
             }
-            Stmt::Var(_, _) => todo!(),
+            Stmt::Var(token, expr) => {
+                let value = self.evaluate(expr);
+                //println!("{:?}", token.lexeme);
+                self.vars.insert(token.lexeme.clone(), value);
+            },
         }
     }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
         for i in 0..statements.len() {
+            //println!("{:?}", statements[i].n);
             self.evaluate_stmt(&statements[i]);
         }
     }
@@ -92,24 +102,24 @@ impl Interpreter {
                 let right = self.evaluate(right);
 
                 macro_rules! apply_arith_to_nums {
-                ($type: ident, $op: tt) => {
-                    if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
-                        Value::Num(num1 $op num2)
-                    } else {
-                        crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"))
-                    }
-                };
-            }
+                    ($type: ident, $op: tt) => {
+                        if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
+                            Value::Num(num1 $op num2)
+                        } else {
+                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"))
+                        }
+                    };
+                }
 
                 macro_rules! apply_logic_to_nums {
-                ($type: ident, $op: tt) => {
-                    if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
-                        Value::from_bool(num1 $op num2)
-                    } else {
-                        crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"));
-                    }
-                };
-            }
+                    ($type: ident, $op: tt) => {
+                        if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
+                            Value::from_bool(num1 $op num2)
+                        } else {
+                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"));
+                        }
+                    };
+                }
 
                 match op.kind {
                     TokenType::Plus => {
@@ -121,7 +131,7 @@ impl Interpreter {
                         }
                         crash(
                             op.line,
-                            "Plus kan alleen worden gebruikt voor nummers en strings, kaaskop",
+                            "Plus kan alleen worden gebruikt voor nummers en strings, kaaskop.",
                         );
                     }
                     TokenType::Minus => apply_arith_to_nums!(Minus, -),
@@ -135,11 +145,11 @@ impl Interpreter {
                     TokenType::Equal => apply_logic_to_nums!(Equal, ==),
                     TokenType::EqualEqual => Value::from_bool(is_equal(&left, &right)),
                     TokenType::BangEqual => Value::from_bool(!is_equal(&left, &right)),
-                    _ => panic!("Unreachable"),
+                    _ => panic!("Unreachable."),
                 }
             }
-            Expr::Var(_) => todo!(),
-            Expr::None => todo!(),
+            Expr::Var(token) => self.vars.get(&token.lexeme).unwrap().clone(),
+            Expr::None => panic!("Unreachable."),
         }
     }
 }
