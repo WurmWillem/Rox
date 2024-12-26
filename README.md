@@ -57,15 +57,14 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 <H2>How do I use Rox?</H2>
 
 - Download the source code and either
-  - Download the source code and execute it with the command cargo run "expression" as such 
+  - execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
   ```
   cargo run "2 + 1"
   output: 3
   ```
-  - Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments
+  - Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
   ```
   cargo run
-  output: 3
   ```
 - Ask me for a binary and I'll send you an executable for your platform
 
