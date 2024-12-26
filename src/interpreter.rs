@@ -1,75 +1,32 @@
 use core::panic;
 use std::collections::HashMap;
 
-use crate::{crash, expr::Expr, stmt::Stmt, token::{self, Literal}, token_type::TokenType};
-
-#[derive(Debug, Clone)]
-pub enum Value {
-    Nil,
-    True,
-    False,
-    Num(f64),
-    Str(String),
-}
-impl Value {
-    pub fn to_string(&self) -> String {
-        match self {
-            Value::Nil => "niks".to_string(),
-            Value::True => "wellus".to_string(),
-            Value::False => "nietus".to_string(),
-            Value::Num(num) => num.to_string(),
-            Value::Str(str) => str.to_string(),
-        }
-    }
-
-    fn from_lit(lit: &Literal) -> Self {
-        match lit {
-            Literal::None => panic!("unreachable"),
-            Literal::Str(str) => Value::Str(str.clone()),
-            Literal::Num(num) => Value::Num(*num),
-            Literal::True => Value::True,
-            Literal::False => Value::False,
-            Literal::Nil => Value::Nil,
-        }
-    }
-
-    fn from_bool(is_true: bool) -> Value {
-        if is_true {
-            return Value::True;
-        }
-        Value::False
-    }
-
-    fn is_true(&self) -> bool {
-        match self {
-            Value::False | Value::Nil => false,
-            _ => true,
-        }
-    }
-}
+use crate::{crash, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value};
 
 pub struct Interpreter {
-   vars: HashMap<String, Value>, 
+    vars: HashMap<String, Value>,
 }
 impl Interpreter {
     pub fn new() -> Self {
-        Self { vars: HashMap::new() }
+        Self {
+            vars: HashMap::new(),
+        }
     }
     pub fn evaluate_stmt(&mut self, stmt: &Stmt) {
         match stmt {
             Stmt::Expr(expr) => {
-                self.evaluate(expr);
+                self.evaluate_expr(expr);
             }
             Stmt::Print(expr) => {
-                print!("{}", self.evaluate(expr).to_string());
+                print!("{}", self.evaluate_expr(expr).to_string());
             }
             Stmt::Println(expr) => {
-                println!("{}", self.evaluate(expr).to_string());
+                println!("{}", self.evaluate_expr(expr).to_string());
             }
             Stmt::Var(token, expr) => {
-                let value = self.evaluate(expr);
+                let value = self.evaluate_expr(expr);
                 self.vars.insert(token.lexeme.clone(), value);
-            },
+            }
         }
     }
 
@@ -79,12 +36,12 @@ impl Interpreter {
         }
     }
 
-    pub fn evaluate(&mut self, expr: &Expr) -> Value {
+    pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
         match expr {
             Expr::Lit(lit) => Value::from_lit(&lit),
-            Expr::Grouping(expr) => self.evaluate(expr),
+            Expr::Grouping(expr) => self.evaluate_expr(expr),
             Expr::Unary(token, expr) => {
-                let right = self.evaluate(expr);
+                let right = self.evaluate_expr(expr);
 
                 match token.kind {
                     TokenType::Minus => match right {
@@ -99,8 +56,8 @@ impl Interpreter {
                 }
             }
             Expr::Binary(left, op, right) => {
-                let left = self.evaluate(left);
-                let right = self.evaluate(right);
+                let left = self.evaluate_expr(left);
+                let right = self.evaluate_expr(right);
 
                 macro_rules! apply_arith_to_nums {
                     ($type: ident, $op: tt) => {
@@ -149,12 +106,13 @@ impl Interpreter {
                     _ => panic!("Unreachable."),
                 }
             }
-            Expr::Var(token) => {
-                match self.vars.get(&token.lexeme) {
-                    Some(value) => value.clone(),
-                    None => crash(token.line, &format!("{} is een onbekende variabele.", token.lexeme)),
-                }
-            }
+            Expr::Var(token) => match self.vars.get(&token.lexeme) {
+                Some(value) => value.clone(),
+                None => crash(
+                    token.line,
+                    &format!("{} is een onbekende variabele.", token.lexeme),
+                ),
+            },
             Expr::None => panic!("Unreachable."),
         }
     }

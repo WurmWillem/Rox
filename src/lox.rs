@@ -16,11 +16,23 @@ impl Lox {
     }
 
     pub fn run_prompt(&mut self, source: String) {
-        self.run(source);
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+
+        let mut parser = Parser::new(tokens);
+        let expr = parser.parse_expr();
+        if PRINT_PARS_OUTPUT {
+           println!("{}", expr.to_string()); 
+        }
+
+        let mut interpreter = Interpreter::new();
+        let value = interpreter.evaluate_expr(&expr);
+
+        println!("{}", value.to_string());
     }
 
     pub fn run_file(&mut self, source: &str) {
-        let source = fs::read_to_string(source).unwrap();
+        let source = fs::read_to_string(source).expect("file.lox is niet gevonden. het moet in dezelfde directory als de binary of Cargo.toml zitten.");
         let source = source.to_string();
         self.run(source);
     }
@@ -37,10 +49,7 @@ impl Lox {
         }
 
         let mut parser = Parser::new(tokens);
-        let statements = parser.parse();
-        if PRINT_PARS_OUTPUT {
-            //println!("{:?}", expr.stringify());
-        }
+        let statements = parser.parse_statements();
 
         let mut interpreter = Interpreter::new();
 

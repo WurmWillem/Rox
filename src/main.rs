@@ -3,20 +3,21 @@ use std::env;
 use colored::Colorize;
 use lox::Lox;
 
-mod stmt;
 mod expr;
-mod lox;
 mod interpreter;
+mod lox;
 mod parser;
 mod scanner;
+mod stmt;
 mod token;
 mod token_type;
+mod value;
 
 fn main() {
     let mut lox = Lox::new();
 
     let args: Vec<String> = env::args().collect();
-      //env::set_var("RUST_BACKTRACE", "1");
+    //env::set_var("RUST_BACKTRACE", "1");
 
     if args.len() == 1 {
         // run lox code from a file

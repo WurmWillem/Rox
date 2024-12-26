@@ -2,4 +2,6 @@ laat breedte = 3;
 laat lengte = 5;
 
 spreek "oppervlakte = ";
-spreek breedte * lengte;
+roep breedte * lengte;
+laat breedte = "hey";
+roep breedte;

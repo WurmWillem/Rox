@@ -11,7 +11,7 @@ pub enum Expr {
 }
 // used for debugging purposes
 impl Expr {
-    pub fn stringify(&self) -> String {
+    pub fn to_string(&self) -> String {
         match self {
             Expr::Lit(lit) => lit.to_string(),
             Expr::Grouping(expr) => {
@@ -38,7 +38,7 @@ fn parenthesize(name: String, exprs: Vec<Expr>) -> String {
 
     for i in 0..exprs.len() {
         out.push_str(" ");
-        out.push_str(&exprs[i].stringify());
+        out.push_str(&exprs[i].to_string());
     }
 
     out.push_str(")");
