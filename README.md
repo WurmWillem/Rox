@@ -14,34 +14,42 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 
 - Beautiful Dutch keywords 🇳🇱 (wellus, nietus, ...)
 - Memory safe, as it is written in 100% safe Rust
-- Arithmetic with proper precedence rules
-  - Operators supported are +, -, *, /, (), 
-    
-  ```
-  3 * (2 + 3)
-  output: 15
+- Extensive expressions
+  - Arithmetic with proper precedence rules
+    - Operators supported are +, -, *, /, (), 
       
+    ```
+    3 * (2 + 3)
+    output: 15
+        
+    
+    1 + 6 / 3
+    output: 3
   
-  1 + 6 / 3
-  output: 3
-
-  "Hallo " + "Wereld!"
-  output: Hallo Wereld!
+    "Hallo " + "Wereld!"
+    output: Hallo Wereld!
+    ```
+  - Logic operators that can be chained
+    - Logic operators supported are ==, >, <, >=, <= !=, !, //
+    ```
+    5 == 2 + 3
+    output: wellus
+  
+    1 < 3
+    output: wellus
+  
+    (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
+    output: wellus
+  
+    wellus == !nietus == !!wellus
+    output: wellus
+    ```
+- Variables
   ```
-- Logic operators that can be chained
-  - Logic operators supported are ==, >, <, >=, <= !=, !, //
-  ```
-  5 == 2 + 3
-  output: wellus
-
-  1 < 3
-  output: wellus
-
-  (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
-  output: wellus
-
-  wellus == !nietus == !!wellus
-  output: wellus
+  laat x = 5;
+  laat y = 3;
+  spreek x * y;
+  output: 15
   ```
 
 <H2>How do I use Rox?</H2>
@@ -58,6 +66,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   output: 3
   ```
 - Ask me for a binary and I'll send you an executable for your platform
+
 <H2>Roadmap</H2>
 
 - Make it an actually functioning language with variables and control flow 💀
