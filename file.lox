@@ -5,6 +5,9 @@ laat y = 4;
 /*
 roep (-x)^y; 
 */
+/* roep 5; */
+roep 5;
+*/
 roep (-x)^y;
 
 

@@ -102,23 +102,7 @@ impl Scanner {
                         self.current += 1;
                     }
                 } else if self.matches('*') {
-                    while !self.at_end_input() {
-                        if self.peek() == '\n' {
-                            self.line += 1;
-                        }
-                        self.current += 1;
-
-                        if self.matches('/') && self.get_next_char() == '*' {
-                            dbg!(1);
-                            self.current += 2;
-                            self.scan_token();
-                        }
-                        if self.matches('*') && self.get_next_char() == '/' {
-                            dbg!(2);
-                            self.current += 2;
-                            return;
-                        }
-                    }
+                    self.check_for_end_comment();
                 } else {
                     self.add_token(TokenType::Slash);
                     self.current += 1;
@@ -171,7 +155,21 @@ impl Scanner {
     }
 
     fn check_for_end_comment(&mut self) {
-        
+        while !self.at_end_input() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.current += 1;
+
+            if self.matches('/') && self.get_next_char() == '*' {
+                self.current += 2;
+                self.check_for_end_comment();
+            }
+            if self.matches('*') && self.get_next_char() == '/' {
+                self.current += 2;
+                return;
+            }
+        }
     }
 
     fn peek(&self) -> char {
