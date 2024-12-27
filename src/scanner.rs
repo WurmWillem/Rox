@@ -67,7 +67,7 @@ impl Scanner {
 
         macro_rules! ternary {
             ($c: expr, $t1: ident, $t2: ident) => {{
-                let token = if self.same($c) {
+                let token = if self.matches($c) {
                     self.current += 1;
                     TokenType::$t1
                 } else {
@@ -97,9 +97,27 @@ impl Scanner {
 
             // comments
             '/' => {
-                if self.same('/') {
+                if self.matches('/') {
                     while self.peek() != '\n' && !self.at_end_input() {
                         self.current += 1;
+                    }
+                } else if self.matches('*') {
+                    while !self.at_end_input() {
+                        if self.peek() == '\n' {
+                            self.line += 1;
+                        }
+                        self.current += 1;
+
+                        if self.matches('/') && self.get_next_char() == '*' {
+                            dbg!(1);
+                            self.current += 2;
+                            self.scan_token();
+                        }
+                        if self.matches('*') && self.get_next_char() == '/' {
+                            dbg!(2);
+                            self.current += 2;
+                            return;
+                        }
                     }
                 } else {
                     self.add_token(TokenType::Slash);
@@ -152,6 +170,10 @@ impl Scanner {
         }
     }
 
+    fn check_for_end_comment(&mut self) {
+        
+    }
+
     fn peek(&self) -> char {
         if self.at_end_input() {
             '\0'
@@ -160,7 +182,7 @@ impl Scanner {
         }
     }
 
-    fn same(&mut self, expected: char) -> bool {
+    fn matches(&mut self, expected: char) -> bool {
         !self.at_end_input() && self.get_current_char() == expected
     }
 

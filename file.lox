@@ -1,6 +1,10 @@
 laat x = 2;
 laat y = 4;
 
+/*
+/*
+roep (-x)^y; 
+*/
 roep (-x)^y;
 
 
