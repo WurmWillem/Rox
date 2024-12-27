@@ -1,8 +1,7 @@
-laat x = "oppervlakte = ";
-laat y = "15";
-roep x + y;
+laat x = 2;
+laat y = 3;
 
-
+roep (-x)^y;
 
 
 // laat x = 1 + 2;

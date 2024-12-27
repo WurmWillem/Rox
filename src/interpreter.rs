@@ -102,6 +102,11 @@ impl Interpreter {
                     TokenType::Star => apply_arith_to_nums!(Star, *),
                     TokenType::Slash => apply_arith_to_nums!(Slash, /),
 
+                    TokenType::Caret => match (left, right) {
+                        (Value::Num(num1), Value::Num(num2)) => return Value::Num(num1.powf(num2)),
+                        _ => todo!(),
+                    },
+
                     TokenType::Greater => apply_logic_to_nums!(Greater, >),
                     TokenType::GreaterEqual => apply_logic_to_nums!(GreaterEqual, >=),
                     TokenType::Less => apply_logic_to_nums!(Less, <),

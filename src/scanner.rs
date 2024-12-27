@@ -88,6 +88,7 @@ impl Scanner {
             '+' => self.add_token(TokenType::Plus),
             ';' => self.add_token(TokenType::Semicolon),
             '*' => self.add_token(TokenType::Star),
+            '^' => self.add_token(TokenType::Caret),
 
             '!' => ternary!('=', BangEqual, Bang),
             '=' => ternary!('=', EqualEqual, Equal),

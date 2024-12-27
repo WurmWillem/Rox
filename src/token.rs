@@ -9,7 +9,7 @@ pub enum Literal {
     Num(f64),
     True,
     False,
-    Nil
+    Nil,
 }
 impl Display for Literal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
