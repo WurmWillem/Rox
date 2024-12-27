@@ -74,9 +74,9 @@ You can either download the source code or ask me for a binary and I'll send you
 - Add control flow (💀)
 - Add enums
 - Remove null and replace it with Option<T> enum
-- /* */ support
 - multiplication on strings
 - Add variable scope
+- ✅ Add (nested) multi-line comments with /* */
 - ✅ Add variables
 - ✅ Make '+' work on combinations ofstrings and integers, e.g. "oppervlakte =" + 5 == "oppervlakte = 5" 
 - ✅ Add '^' operator, e.g. 2^3 == 8
