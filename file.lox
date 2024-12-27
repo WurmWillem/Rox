@@ -1,7 +1,9 @@
-laat breedte = 3;
-laat lengte = 5;
-lengte = 2;
-roep "oppervlakte = " + breedte * lengte;
+laat x = 5;
+{
+  x = 3;
+  roep x;
+}
+roep x;
 
 
 /*

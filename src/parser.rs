@@ -53,27 +53,40 @@ impl Parser {
         if self.matches(vec![TokenType::Print]) {
             return self.print_statement();
         }
-        if self.matches(vec![TokenType::Println]) {
+        else if self.matches(vec![TokenType::Println]) {
             return self.println_statement();
+        }
+        else if self.matches(vec![TokenType::LeftBrace]) {
+            return self.block_statement();
         }
         self.expr_statement()
     }
 
+    fn block_statement(&mut self) -> Stmt {
+        let mut statements = Vec::new();
+        while !self.check(TokenType::RightBrace) && !self.is_at_end() {
+            statements.push(self.declaration()); 
+        } 
+
+        self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor");
+        Stmt::Block(statements)
+    }
+
     fn print_statement(&mut self) -> Stmt {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
         Stmt::Print(expr)
     }
 
     fn println_statement(&mut self) -> Stmt {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
         Stmt::Println(expr)
     }
 
     fn expr_statement(&mut self) -> Stmt {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
         Stmt::Expr(expr)
     }
 
