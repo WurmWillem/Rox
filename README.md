@@ -71,10 +71,11 @@ You can either download the source code or ask me for a binary and I'll send you
 
 <H2>Roadmap</H2>
 
-- Make it an actually functioning language with variables and control flow 💀
+- Add control flow (💀)
 - Add enums
 - Remove null and replace it with Option<T> enum
-  - Most of my homies hate null
 - /* */ support
 - multiplication on strings
-- '^' operator, e.g. 2^3 == 8
+- ✅ Add variables
+- ✅ Make '+' work on combinations ofstrings and integers, e.g. "oppervlakte =" + 5 == "oppervlakte = 5" 
+- ✅ Add '^' operator, e.g. 2^3 == 8
