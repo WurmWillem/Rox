@@ -81,18 +81,23 @@ impl Interpreter {
                 }
 
                 match op.kind {
-                    TokenType::Plus => {
-                        if let (Value::Num(num1), Value::Num(num2)) = (left.clone(), right.clone())
-                        {
-                            return Value::Num(num1 + num2);
-                        } else if let (Value::Str(str1), Value::Str(str2)) = (left, right) {
-                            return Value::Str(format!("{}{}", str1, str2));
+                    TokenType::Plus => match (left, right) {
+                        (Value::Num(num), Value::Str(str)) => {
+                            return Value::Str(format!("{}{}", num, str))
                         }
-                        crash(
+
+                        (Value::Str(str), Value::Num(num)) => {
+                            return Value::Str(format!("{}{}", str, num))
+                        }
+                        (Value::Num(num1), Value::Num(num2)) => return Value::Num(num1 + num2),
+                        (Value::Str(str1), Value::Str(str2)) => {
+                            return Value::Str(format!("{}{}", str1, str2))
+                        }
+                        _ => crash(
                             op.line,
                             "Plus kan alleen worden gebruikt voor nummers en strings, kaaskop.",
-                        );
-                    }
+                        ),
+                    },
                     TokenType::Minus => apply_arith_to_nums!(Minus, -),
                     TokenType::Star => apply_arith_to_nums!(Star, *),
                     TokenType::Slash => apply_arith_to_nums!(Slash, /),
@@ -123,7 +128,10 @@ impl Interpreter {
 
                 match self.vars.get_mut(&name.lexeme) {
                     Some(old_value) => *old_value = new_value.clone(),
-                    None =>  crash(name.line, &format!("{} is een onbekende variabele.", name.lexeme)),
+                    None => crash(
+                        name.line,
+                        &format!("{} is een onbekende variabele.", name.lexeme),
+                    ),
                 }
 
                 new_value

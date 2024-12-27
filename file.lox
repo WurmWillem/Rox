@@ -1,6 +1,6 @@
-laat x = 5;
-x = 3;
-spreek x;
+laat x = "oppervlakte = ";
+laat y = "15";
+roep x + y;
 
 
 
