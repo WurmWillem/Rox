@@ -139,21 +139,9 @@ impl Parser {
     }
 
     fn factor(&mut self) -> Expr {
-        let mut expr = self.power();
-
-        while self.matches(vec![TokenType::Star, TokenType::Slash]) {
-            let op = self.previous();
-            let right = self.power();
-            expr = Expr::Binary(Box::new(expr), op, Box::new(right));
-        }
-
-        expr
-    }
-
-    fn power(&mut self) -> Expr {
         let mut expr = self.unary();
 
-        while self.matches(vec![TokenType::Caret]) {
+        while self.matches(vec![TokenType::Star, TokenType::Slash]) {
             let op = self.previous();
             let right = self.unary();
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
@@ -165,11 +153,23 @@ impl Parser {
     fn unary(&mut self) -> Expr {
         if self.matches(vec![TokenType::Bang, TokenType::Minus]) {
             let op = self.previous();
-            let right = self.unary();
+            let right = self.power();
             return Expr::Unary(op, Box::new(right));
         }
 
-        self.primary()
+        self.power()
+    }
+
+    fn power(&mut self) -> Expr {
+        let mut expr = self.primary();
+
+        while self.matches(vec![TokenType::Caret]) {
+            let op = self.previous();
+            let right = self.primary();
+            expr = Expr::Binary(Box::new(expr), op, Box::new(right));
+        }
+
+        expr
     }
 
     fn primary(&mut self) -> Expr {

@@ -1,5 +1,5 @@
 laat x = 2;
-laat y = 3;
+laat y = 4;
 
 roep (-x)^y;
 
