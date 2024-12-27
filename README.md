@@ -49,10 +49,8 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   ```
   laat breedte = 3;
   laat lengte = 5;
-  
-  spreek "oppervlakte = ";
-  roep breedte * lengte;
-  
+
+  roep "oppervlakte = " + breedte * lengte;
   output: oppervlakte = 15
   ```
 
