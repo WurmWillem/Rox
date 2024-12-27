@@ -1,15 +1,16 @@
 use core::panic;
-use std::collections::HashMap;
 
-use crate::{crash, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value};
+use crate::{
+    crash, environment::Environment, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value,
+};
 
 pub struct Interpreter {
-    vars: HashMap<String, Value>,
+    env: Environment,
 }
 impl Interpreter {
     pub fn new() -> Self {
         Self {
-            vars: HashMap::new(),
+            env: Environment::new(),
         }
     }
 
@@ -32,7 +33,7 @@ impl Interpreter {
             }
             Stmt::Var(token, expr) => {
                 let value = self.evaluate_expr(expr);
-                self.vars.insert(token.lexeme.clone(), value);
+                self.env.insert_value(token.lexeme.clone(), value);
             }
         }
     }
@@ -119,25 +120,13 @@ impl Interpreter {
             }
 
             // get value from variable name out of hashmap
-            Expr::Var(token) => match self.vars.get(&token.lexeme) {
-                Some(value) => value.clone(),
-                None => crash(
-                    token.line,
-                    &format!("{} is een onbekende variabele.", token.lexeme),
-                ),
-            },
+            Expr::Var(token) => self.env.get_value(&token),
 
             // overwrite value from variable name out of hashmap
             Expr::Assign(name, expr) => {
                 let new_value = self.evaluate_expr(expr);
 
-                match self.vars.get_mut(&name.lexeme) {
-                    Some(old_value) => *old_value = new_value.clone(),
-                    None => crash(
-                        name.line,
-                        &format!("{} is een onbekende variabele.", name.lexeme),
-                    ),
-                }
+                self.env.replace_value(name, new_value.clone());
 
                 new_value
             }

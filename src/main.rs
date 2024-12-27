@@ -12,6 +12,7 @@ mod stmt;
 mod token;
 mod token_type;
 mod value;
+mod environment;
 
 fn main() {
     let mut lox = Lox::new();
