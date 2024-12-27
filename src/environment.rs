@@ -1,14 +1,15 @@
 use crate::{crash, token::Token, value::Value};
 use std::collections::HashMap;
 
+#[derive(Debug, Clone)]
 pub struct Environment {
     enclosing: Option<Box<Environment>>,
     vars: HashMap<String, Value>,
 }
 impl Environment {
-    pub fn new() -> Self {
+    pub fn new(enclosing: Option<Box<Environment>>) -> Self {
         Self {
-            enclosing: None,
+            enclosing,
             vars: HashMap::new(),
         }
     }

@@ -6,4 +6,5 @@ pub enum Stmt {
     Print(Expr),
     Println(Expr),
     Var(Token, Expr),
+    Block(Vec<Stmt>),
 }

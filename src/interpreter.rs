@@ -10,7 +10,7 @@ pub struct Interpreter {
 impl Interpreter {
     pub fn new() -> Self {
         Self {
-            env: Environment::new(),
+            env: Environment::new(None),
         }
     }
 
@@ -35,7 +35,22 @@ impl Interpreter {
                 let value = self.evaluate_expr(expr);
                 self.env.insert_value(token.lexeme.clone(), value);
             }
+            Stmt::Block(statements) => {
+                self.evaluate_block(
+                    statements,
+                    Environment::new(Some(Box::new(self.env.clone()))),
+                );
+            }
         }
+    }
+
+    fn evaluate_block(&mut self, statements: &Vec<Stmt>, env: Environment) {
+        let previous = Environment::new(Some(Box::new(self.env.clone())));
+        self.env = env;
+        for stmt in statements {
+            self.evaluate_stmt(stmt);
+        }
+        self.env = previous;
     }
 
     pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
