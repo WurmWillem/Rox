@@ -2,12 +2,12 @@ use crate::{crash, token::Token, value::Value};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-pub struct Environment {
-    enclosing: Option<Box<Environment>>,
+pub struct Env {
+    enclosing: Option<Box<Env>>,
     vars: HashMap<String, Value>,
 }
-impl Environment {
-    pub fn new(enclosing: Option<Box<Environment>>) -> Self {
+impl Env {
+    pub fn new(enclosing: Option<Box<Env>>) -> Self {
         Self {
             enclosing,
             vars: HashMap::new(),

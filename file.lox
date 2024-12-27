@@ -1,9 +1,6 @@
-laat x = 5;
-{
-  x = 3;
-  roep x;
-}
-roep x;
+laat x;
+laat y = 5;
+roep x + y;
 
 
 /*

@@ -1,16 +1,16 @@
 use core::panic;
 
 use crate::{
-    crash, environment::Environment, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value,
+    crash, environment::Env, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value,
 };
 
 pub struct Interpreter {
-    env: Environment,
+    env: Env,
 }
 impl Interpreter {
     pub fn new() -> Self {
         Self {
-            env: Environment::new(None),
+            env: Env::new(None),
         }
     }
 
@@ -38,14 +38,14 @@ impl Interpreter {
             Stmt::Block(statements) => {
                 self.evaluate_block(
                     statements,
-                    Environment::new(Some(Box::new(self.env.clone()))),
+                    Env::new(Some(Box::new(self.env.clone()))),
                 );
             }
         }
     }
 
-    fn evaluate_block(&mut self, statements: &Vec<Stmt>, env: Environment) {
-        let previous = Environment::new(Some(Box::new(self.env.clone())));
+    fn evaluate_block(&mut self, statements: &Vec<Stmt>, env: Env) {
+        let previous = Env::new(Some(Box::new(self.env.clone())));
         self.env = env;
         for stmt in statements {
             self.evaluate_stmt(stmt);

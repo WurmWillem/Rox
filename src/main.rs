@@ -3,6 +3,7 @@ use std::env;
 use colored::Colorize;
 use lox::Lox;
 
+mod environment;
 mod expr;
 mod interpreter;
 mod lox;
@@ -12,9 +13,14 @@ mod stmt;
 mod token;
 mod token_type;
 mod value;
-mod environment;
 
 fn main() {
+    //let mut x = 5;
+    //{
+    //    x = 3;
+    //    println!("{}", x);
+    //}
+    //println!("{}", x);
     let mut lox = Lox::new();
 
     let args: Vec<String> = env::args().collect();
