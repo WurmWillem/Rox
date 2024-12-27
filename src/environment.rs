@@ -17,23 +17,29 @@ impl Environment {
         self.vars.insert(name, value);
     }
 
-    pub fn get_value(&mut self, token: &Token) -> Value {
-        match self.vars.get(&token.lexeme) {
-            Some(value) => value.clone(),
-            None => crash(
+    pub fn get_value(&self, token: &Token) -> Value {
+        if let Some(value) = self.vars.get(&token.lexeme) {
+            value.clone()
+        } else if let Some(env) = &self.enclosing {
+            env.get_value(token)
+        } else {
+            crash(
                 token.line,
                 &format!("{} is een onbekende variabele.", token.lexeme),
-            ),
+            );
         }
     }
 
     pub fn replace_value(&mut self, name: &Token, new_value: Value) {
-        match self.vars.get_mut(&name.lexeme) {
-            Some(old_value) => *old_value = new_value,
-            None => crash(
+        if let Some(old_value) = self.vars.get_mut(&name.lexeme) {
+            *old_value = new_value;
+        } else if let Some(ref mut env) = self.enclosing {
+            env.replace_value(name, new_value);
+        } else {
+            crash(
                 name.line,
                 &format!("{} is een onbekende variabele.", name.lexeme),
-            ),
+            );
         }
     }
 }

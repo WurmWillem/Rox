@@ -125,9 +125,7 @@ impl Interpreter {
             // overwrite value from variable name out of hashmap
             Expr::Assign(name, expr) => {
                 let new_value = self.evaluate_expr(expr);
-
                 self.env.replace_value(name, new_value.clone());
-
                 new_value
             }
         }

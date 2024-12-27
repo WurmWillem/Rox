@@ -1,14 +1,7 @@
-laat x = 2;
-laat y = 4;
-
-/*
-/*
-roep (-x)^y; 
-*/
-/* roep 5; */
-roep 5;
-*/
-roep (-x)^y;
+laat breedte = 3;
+laat lengte = 5;
+lengte = 2;
+roep "oppervlakte = " + breedte * lengte;
 
 
 /*
