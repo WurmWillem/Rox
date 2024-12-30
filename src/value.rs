@@ -21,7 +21,7 @@ impl Value {
 
     pub fn from_lit(lit: &Literal) -> Self {
         match lit {
-            Literal::None => panic!("unreachable"),
+            Literal::None => panic!("Unreachable."),
             Literal::Str(str) => Value::Str(str.clone()),
             Literal::Num(num) => Value::Num(*num),
             Literal::True => Value::True,

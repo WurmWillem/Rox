@@ -1,6 +1,6 @@
-laat x;
-laat y = 5;
-roep x + y;
+laat x = 5;
+laat y = 3;
+roep x^y;
 
 
 /*

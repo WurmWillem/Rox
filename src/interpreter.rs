@@ -1,8 +1,4 @@
-use core::panic;
-
-use crate::{
-    crash, environment::Env, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value,
-};
+use crate::{crash, environment::Env, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value};
 
 pub struct Interpreter {
     env: Env,
@@ -36,10 +32,14 @@ impl Interpreter {
                 self.env.insert_value(token.lexeme.clone(), value);
             }
             Stmt::Block(statements) => {
-                self.evaluate_block(
-                    statements,
-                    Env::new(Some(Box::new(self.env.clone()))),
-                );
+                self.evaluate_block(statements, Env::new(Some(Box::new(self.env.clone()))));
+            }
+            Stmt::If(expr, block) => {
+                let should_execute = self.evaluate_expr(expr);
+                if let Value::True = should_execute {
+                    self.evaluate_stmt(block);
+                    //self.evaluate_block(statements, Env::new(Some(Box::new(self.env.clone()))));
+                }
             }
         }
     }
@@ -81,7 +81,7 @@ impl Interpreter {
                         if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                             Value::Num(num1 $op num2)
                         } else {
-                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"))
+                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt op nummers, kaaskop"))
                         }
                     };
                 }
@@ -91,7 +91,7 @@ impl Interpreter {
                         if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
                             Value::from_bool(num1 $op num2)
                         } else {
-                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt voor nummers, kaaskop"));
+                            crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt op nummers, kaaskop"));
                         }
                     };
                 }
@@ -111,7 +111,7 @@ impl Interpreter {
                         }
                         _ => crash(
                             op.line,
-                            "Plus kan alleen worden gebruikt voor nummers en strings, kaaskop.",
+                            "Plus kan alleen worden gebruikt op nummers en strings, kaaskop.",
                         ),
                     },
                     TokenType::Minus => apply_arith_to_nums!(Minus, -),
@@ -120,7 +120,10 @@ impl Interpreter {
 
                     TokenType::Caret => match (left, right) {
                         (Value::Num(num1), Value::Num(num2)) => return Value::Num(num1.powf(num2)),
-                        _ => todo!(),
+                        _ => crash(
+                            op.line,
+                            "Caret kan alleen worden gebruikt op nummers, kaaskop.",
+                        ),
                     },
 
                     TokenType::Greater => apply_logic_to_nums!(Greater, >),

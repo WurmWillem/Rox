@@ -52,12 +52,14 @@ impl Parser {
     fn statement(&mut self) -> Stmt {
         if self.matches(vec![TokenType::Print]) {
             return self.print_statement();
-        }
-        else if self.matches(vec![TokenType::Println]) {
+        } else if self.matches(vec![TokenType::Println]) {
             return self.println_statement();
-        }
-        else if self.matches(vec![TokenType::LeftBrace]) {
+        } else if self.matches(vec![TokenType::LeftBrace]) {
             return self.block_statement();
+        } else if self.matches(vec![TokenType::If]) {
+            let expr = self.expression();
+            let block = self.statement();
+            return Stmt::If(expr, Box::new(block));
         }
         self.expr_statement()
     }
@@ -65,8 +67,8 @@ impl Parser {
     fn block_statement(&mut self) -> Stmt {
         let mut statements = Vec::new();
         while !self.check(TokenType::RightBrace) && !self.is_at_end() {
-            statements.push(self.declaration()); 
-        } 
+            statements.push(self.declaration());
+        }
 
         self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor");
         Stmt::Block(statements)
