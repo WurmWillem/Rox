@@ -1,46 +1,60 @@
-use crate::{crash, token::Token, value::Value};
+use crate::{token::Token, value::Value};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Env {
-    enclosing: Option<Box<Env>>,
+    child: Option<Box<Env>>,
     vars: HashMap<String, Value>,
 }
 impl Env {
-    pub fn new(enclosing: Option<Box<Env>>) -> Self {
+    pub fn new() -> Self {
         Self {
-            enclosing,
+            child: None,
             vars: HashMap::new(),
         }
     }
 
-    pub fn insert_value(&mut self, name: String, value: Value) {
-        self.vars.insert(name, value);
-    }
-
-    pub fn get_value(&self, token: &Token) -> Value {
-        if let Some(value) = self.vars.get(&token.lexeme) {
-            value.clone()
-        } else if let Some(env) = &self.enclosing {
-            env.get_value(token)
-        } else {
-            crash(
-                token.line,
-                &format!("{} is een onbekende variabele.", token.lexeme),
-            );
+    pub fn create_new_child(&mut self) {
+        match &mut self.child {
+            Some(child) => child.create_new_child(),
+            None => self.child = Some(Box::new(Env::new())),
         }
     }
 
-    pub fn replace_value(&mut self, name: &Token, new_value: Value) {
+    pub fn kill_youngest_child(&mut self) {
+        match &mut self.child {
+            Some(child) => child.kill_youngest_child(),
+            None => self.child = None,
+        }
+    }
+
+    pub fn insert_value(&mut self, name: &String, value: &Value) {
+        if let Some(ref mut child) = self.child {
+            child.insert_value(&name, value);
+        }
+        self.vars.insert(name.clone(), value.clone());
+    }
+
+    pub fn get_value(&self, token: &Token) -> Option<Value> {
+        if let Some(child) = &self.child {
+            if let Some(value) = child.get_value(token) {
+                return Some(value);
+            }
+        }
+        self.vars.get(&token.lexeme).cloned()
+    }
+
+    pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), String> {
+        if let Some(ref mut child) = self.child {
+            if let Ok(()) = child.replace_value(name, &new_value) {
+                //return Ok(());
+            }
+        } 
         if let Some(old_value) = self.vars.get_mut(&name.lexeme) {
-            *old_value = new_value;
-        } else if let Some(ref mut env) = self.enclosing {
-            env.replace_value(name, new_value);
+            *old_value = new_value.clone();
+            Ok(())
         } else {
-            crash(
-                name.line,
-                &format!("{} is een onbekende variabele.", name.lexeme),
-            );
+            Err(format!("{} is een onbekende variabele.", name.lexeme))
         }
     }
 }

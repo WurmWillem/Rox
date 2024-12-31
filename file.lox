@@ -1,6 +1,10 @@
 laat x = 5;
-laat y = 3;
-roep x^y;
+roep "voor " + x;
+{
+  x = 1;
+  roep "in " + x;
+}
+roep "na " + x;
 
 
 /*

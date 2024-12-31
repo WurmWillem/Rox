@@ -6,7 +6,7 @@ pub struct Interpreter {
 impl Interpreter {
     pub fn new() -> Self {
         Self {
-            env: Env::new(None),
+            env: Env::new(),
         }
     }
 
@@ -29,10 +29,10 @@ impl Interpreter {
             }
             Stmt::Var(token, expr) => {
                 let value = self.evaluate_expr(expr);
-                self.env.insert_value(token.lexeme.clone(), value);
+                self.env.insert_value(&token.lexeme, &value);
             }
             Stmt::Block(statements) => {
-                self.evaluate_block(statements, Env::new(Some(Box::new(self.env.clone()))));
+                self.evaluate_block(statements);
             }
             Stmt::If(expr, block) => {
                 let should_execute = self.evaluate_expr(expr);
@@ -44,13 +44,12 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_block(&mut self, statements: &Vec<Stmt>, env: Env) {
-        let previous = Env::new(Some(Box::new(self.env.clone())));
-        self.env = env;
+    fn evaluate_block(&mut self, statements: &Vec<Stmt>) {
+        self.env.create_new_child();
         for stmt in statements {
             self.evaluate_stmt(stmt);
         }
-        self.env = previous;
+        self.env.kill_youngest_child();
     }
 
     pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
@@ -138,12 +137,20 @@ impl Interpreter {
             }
 
             // get value from variable name out of hashmap
-            Expr::Var(token) => self.env.get_value(&token),
+            Expr::Var(token) => match self.env.get_value(&token) {
+                Some(value) => value,
+                None => crash(
+                    token.line,
+                    &format!("{} is een onbekende variabele.", token.lexeme),
+                ),
+            },
 
             // overwrite value from variable name out of hashmap
             Expr::Assign(name, expr) => {
                 let new_value = self.evaluate_expr(expr);
-                self.env.replace_value(name, new_value.clone());
+                if let Err(msg) = self.env.replace_value(name, &new_value) {
+                    crash(name.line, &msg)
+                }
                 new_value
             }
         }
