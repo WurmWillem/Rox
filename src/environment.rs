@@ -47,7 +47,7 @@ impl Env {
     pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), String> {
         if let Some(ref mut child) = self.child {
             if let Ok(()) = child.replace_value(name, &new_value) {
-                //return Ok(());
+                return Ok(());
             }
         } 
         if let Some(old_value) = self.vars.get_mut(&name.lexeme) {

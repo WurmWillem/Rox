@@ -1,7 +1,11 @@
 laat x = 5;
-roep "voor " + x;
 {
-  x = 1;
+  x = 4;
+  roep "voor " + x;
+  {
+    x = 1;
+    roep "in " + x;
+  }
   roep "in " + x;
 }
 roep "na " + x;
