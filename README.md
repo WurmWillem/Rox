@@ -53,6 +53,13 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
     roep "positief nummer";
   anders
     roep "het nummer is 0";
+  ```
+  ```
+  als leeftijd >= 18 en leeftijd < 65
+    roep "Je bent een werkende volwassene.";
+  anders als leeftijd < 18 of leeftijd >= 65
+    roep "Je bent niet in de volwassen leeftijdsgroep.";
+  ```
 
 <H2>How do I use Rox?</H2>
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
