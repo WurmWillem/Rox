@@ -26,7 +26,7 @@ impl Scanner {
         }
 
         let keywords = create_keywords!(
-            "en",And "of",Or "als",If "anders",Else "terwijl",While "voor",For
+            "en",And "of",Or "als",If "anders",Else "terwijl",While "voor",For "tot",Until
             "wellus",True "nietus",False "niks",Nil "dit",This "ouder",Super
             "klas",Class "traject",Fun "laat",Var "retour",Return "spreek",Print "roep", Println
         );

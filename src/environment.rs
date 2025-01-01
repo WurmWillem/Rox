@@ -28,11 +28,12 @@ impl Env {
         }
     }
 
-    pub fn insert_value(&mut self, name: &String, value: &Value) {
+    pub fn insert_value(&mut self, name: &String, value: Value) {
         if let Some(ref mut child) = self.child {
             child.insert_value(&name, value);
+            return;
         }
-        self.vars.insert(name.clone(), value.clone());
+        self.vars.insert(name.clone(), value);
     }
 
     pub fn get_value(&self, token: &Token) -> Option<Value> {

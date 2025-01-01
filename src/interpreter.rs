@@ -29,7 +29,7 @@ impl Interpreter {
             }
             Stmt::Var(token, expr) => {
                 let value = self.evaluate_expr(expr);
-                self.env.insert_value(&token.lexeme, &value);
+                self.env.insert_value(&token.lexeme, value);
             }
             Stmt::Block(statements) => {
                 self.evaluate_block(statements);
@@ -57,9 +57,44 @@ impl Interpreter {
                     }
                 }
             }
+
             Stmt::While(expr, statement) => {
                 while let Value::True = self.evaluate_expr(expr) {
-                   self.evaluate_stmt(statement); 
+                    self.evaluate_stmt(statement);
+                }
+            }
+
+            Stmt::For(name, start, end, statement) => {
+                let start_value = self.evaluate_expr(start);
+                let end_value = self.evaluate_expr(end);
+
+                // Ensure start and end are both numbers
+                if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
+                    // Initialize the loop variable in the environment
+
+                    self.env.insert_value(&name.lexeme, Value::Num(current));
+
+                    while current < end {
+                        // Execute the loop body
+                        self.evaluate_stmt(statement);
+
+                        current += 1.0;
+                        if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                            crash(name.line, &msg)
+                        }
+                    }
+
+                    while current > end {
+                        // Execute the loop body
+                        self.evaluate_stmt(statement);
+
+                        current -= 1.0;
+                        if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                            crash(name.line, &msg)
+                        }
+                    }
+                } else {
+                    panic!("Unreachable.");
                 }
             }
         }

@@ -60,6 +60,8 @@ impl Parser {
             return self.if_statement();
         } else if self.matches(vec![TokenType::While]) {
             return self.while_statement();
+        } else if self.matches(vec![TokenType::For]) {
+            return self.for_statement();
         }
         self.expr_statement()
     }
@@ -98,6 +100,22 @@ impl Parser {
         let statement = self.statement();
 
         Stmt::While(expr, Box::new(statement))
+    }
+
+    fn for_statement(&mut self) -> Stmt {
+        let name = self.consume(
+            TokenType::Identifier,
+            "Je moet wel een naam aan de variabele geven.",
+        );
+        self.consume(TokenType::Equal, "Verwachtte '='.");
+
+        let start = self.expression();
+        self.consume(TokenType::Until, "Verwachtte 'tot'.");
+        let end = self.expression();
+
+        let statement = self.statement();
+
+        Stmt::For(name, start, end, Box::new(statement))
     }
 
     fn print_statement(&mut self) -> Stmt {

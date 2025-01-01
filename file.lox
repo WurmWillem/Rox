@@ -1,8 +1,5 @@
-laat x = 0;
-terwijl x < 10 {
-  roep x;
-  x = x + 1;
-}
+voor i = 5 tot 0
+  roep i;
 
 /*
 laat x = 1 + 2;
