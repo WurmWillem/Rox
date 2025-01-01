@@ -70,7 +70,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   }
   ```
   ```
-  voor i = 5 tot 0
+  voor i = 0 tot 10
     roep i;
   ```
 
