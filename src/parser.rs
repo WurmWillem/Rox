@@ -76,12 +76,20 @@ impl Parser {
         let bool = self.expression();
         let then = self.statement();
 
+        let mut else_ifs = Vec::new();
+
         let mut other = None;
-        if self.matches(vec![TokenType::Else]) {
-            other = Some(Box::new(self.statement()));
+        while self.matches(vec![TokenType::Else]) {
+            if self.matches(vec![TokenType::If]) {
+                let else_if = self.expression();
+                else_ifs.push((else_if, Box::new(self.statement())));
+            } else {
+                other = Some(Box::new(self.statement()));
+                break;
+            }
         }
 
-        Stmt::If(bool, Box::new(then), other)
+        Stmt::If(bool, Box::new(then), else_ifs, other)
     }
 
     fn print_statement(&mut self) -> Stmt {

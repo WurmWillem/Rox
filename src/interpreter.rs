@@ -34,13 +34,29 @@ impl Interpreter {
             Stmt::Block(statements) => {
                 self.evaluate_block(statements);
             }
-            Stmt::If(expr, then, other) => {
-                let should_execute = self.evaluate_expr(expr);
+            Stmt::If(expr, then, else_ifs, other) => {
+                let should_execute_first_if = self.evaluate_expr(expr);
 
-                if let Value::True = should_execute {
+                if let Value::True = should_execute_first_if {
+                    // execute first if is true
                     self.evaluate_stmt(then);
-                } else if let Some(other) = other {
-                    self.evaluate_stmt(other);
+                } else {
+                    // check for other else_ifs
+                    let mut else_if_executed = false;
+                    for else_if in else_ifs {
+                        if let Value::True = self.evaluate_expr(&else_if.0) {
+                            self.evaluate_stmt(&else_if.1);
+                            else_if_executed = true;
+                            break;
+                        }
+                    }
+
+                    // execute if there is an else and no else_ifs were executed
+                    if !else_if_executed {
+                        if let Some(other) = other {
+                            self.evaluate_stmt(other);
+                        }
+                    }
                 }
             }
         }
