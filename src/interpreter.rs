@@ -57,6 +57,11 @@ impl Interpreter {
                     }
                 }
             }
+            Stmt::While(expr, statement) => {
+                while let Value::True = self.evaluate_expr(expr) {
+                   self.evaluate_stmt(statement); 
+                }
+            }
         }
     }
 

@@ -58,6 +58,8 @@ impl Parser {
             return self.block_statement();
         } else if self.matches(vec![TokenType::If]) {
             return self.if_statement();
+        } else if self.matches(vec![TokenType::While]) {
+            return self.while_statement();
         }
         self.expr_statement()
     }
@@ -89,6 +91,13 @@ impl Parser {
         }
 
         Stmt::If(first_if, else_ifs, other)
+    }
+
+    fn while_statement(&mut self) -> Stmt {
+        let expr = self.expression();
+        let statement = self.statement();
+
+        Stmt::While(expr, Box::new(statement))
     }
 
     fn print_statement(&mut self) -> Stmt {

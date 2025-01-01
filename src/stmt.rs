@@ -21,4 +21,5 @@ pub enum Stmt {
     Var(Token, Expr),
     Block(Vec<Stmt>),
     If(If, Vec<If>, Option<Box<Stmt>>),
+    While(Expr, Box<Stmt>),
 }

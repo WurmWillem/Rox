@@ -1,4 +1,9 @@
-roep !wellus of 3 != 3;
+laat x = 0;
+terwijl x < 10 {
+  roep x;
+  x = x + 1;
+}
+
 /*
 laat x = 1 + 2;
 scanner     -> Token[Var, x, equals, 1, +, 2, Semicolon]
