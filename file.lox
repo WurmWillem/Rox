@@ -1,11 +1,4 @@
-als !wellus
-  roep 1;
-anders als wellus
-  roep 2;
-anders als !wellus
-  roep 4;
-anders 
-  roep 3;
+roep !wellus of 3 != 3;
 /*
 laat x = 1 + 2;
 scanner     -> Token[Var, x, equals, 1, +, 2, Semicolon]

@@ -37,10 +37,11 @@ impl Value {
         Value::False
     }
 
-    pub fn is_true(&self) -> bool {
+    pub fn is_true(&self) -> Option<bool> {
         match self {
-            Value::False | Value::Nil => false,
-            _ => true,
+            Value::False => Some(false),
+            Value::True => Some(true),
+            _ => None,
         }
     }
 

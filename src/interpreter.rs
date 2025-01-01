@@ -83,7 +83,13 @@ impl Interpreter {
                             "Min kan alleen worden gebruikt voor nummers, kaaskop",
                         ),
                     },
-                    TokenType::Bang => Value::from_bool(!right.is_true()),
+                    TokenType::Bang => match right.is_true() {
+                        Some(bool) => Value::from_bool(!bool),
+                        None => crash(
+                            token.line,
+                            "Uitroepteken kan alleen worden gebruikt op waarheidswaardes, kaaskop",
+                        ),
+                    },
                     _ => panic!("Unreachable."),
                 }
             }
@@ -169,27 +175,51 @@ impl Interpreter {
                 }
                 new_value
             }
-            Expr::Logic(left, op, right) => match op.kind {
-                TokenType::And => {
-                    if let Value::True = self.evaluate_expr(left) {
-                        if let Value::True = self.evaluate_expr(right) {
-                            return Value::True;
+            Expr::Logic(left, op, right) => {
+                match op.kind {
+                    TokenType::And => {
+                        let left = self.evaluate_expr(left).is_true();
+
+                        if let Some(left) = left {
+                            let right = self.evaluate_expr(right).is_true();
+
+                            if let Some(right) = right {
+                                return Value::from_bool(left && right);
+                            } else {
+                                crash(op.line, "'en' kan alleen worden gebruikt op waardigheids waarden, kaaskop.");
+                            }
+                        } else {
+                            crash(
+                                op.line,
+                                "'en' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
+                            );
                         }
                     }
-                    Value::False
-                }
 
-                TokenType::Or => {
-                    if let Value::True = self.evaluate_expr(left) {
-                        return Value::True;
+                    TokenType::Or => {
+                        match self.evaluate_expr(left).is_true() {
+                            Some(left) => {
+                                if left {
+                                    return Value::True;
+                                }
+                            }
+                            None => crash(
+                                op.line,
+                                "'of' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
+                            ),
+                        }
+
+                        match self.evaluate_expr(right).is_true() {
+                            Some(right) => Value::from_bool(right),
+                            None => crash(
+                                op.line,
+                                "'of' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
+                            ),
+                        }
                     }
-                    if let Value::True = self.evaluate_expr(right) {
-                        return Value::True;
-                    }
-                    Value::False
+                    _ => panic!("Unreachable."),
                 }
-                _ => panic!("Unreachable."),
-            },
+            }
         }
     }
 }
