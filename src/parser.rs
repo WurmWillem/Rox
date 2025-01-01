@@ -1,7 +1,7 @@
 use crate::{
     crash,
     expr::Expr,
-    stmt::Stmt,
+    stmt::{If, Stmt},
     token::{Literal, Token},
     token_type::TokenType,
 };
@@ -73,23 +73,22 @@ impl Parser {
     }
 
     fn if_statement(&mut self) -> Stmt {
-        let bool = self.expression();
-        let then = self.statement();
+        let first_if = If::new(self.expression(), self.statement());
 
         let mut else_ifs = Vec::new();
 
         let mut other = None;
         while self.matches(vec![TokenType::Else]) {
             if self.matches(vec![TokenType::If]) {
-                let else_if = self.expression();
-                else_ifs.push((else_if, Box::new(self.statement())));
+                let else_if = If::new(self.expression(), self.statement());
+                else_ifs.push(else_if);
             } else {
                 other = Some(Box::new(self.statement()));
                 break;
             }
         }
 
-        Stmt::If(bool, Box::new(then), else_ifs, other)
+        Stmt::If(first_if, else_ifs, other)
     }
 
     fn print_statement(&mut self) -> Stmt {
