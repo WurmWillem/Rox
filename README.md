@@ -15,36 +15,28 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 - Beautiful Dutch keywords 🇳🇱 (wellus, nietus, laat, ...)
 - Memory safe, as it is written in 100% safe Rust
 - Expressive expressions
-  - Arithmetic with proper precedence rules
-    - Operators supported are +, -, *, /, (), 
+  - Arithmetic with proper precedence rules (similair to C-like languages)
+    - Supported operators are +, -, *, /, ^ (raises a number to a given power, e.g. 2^3 = 8) 
       
     ```
-    3 * (2 + 3)
-    output: 15
-        
-    
-    1 + 6 / 3
-    output: 3
-  
-    "Hallo " + "Wereld!"
+    roep 1 + 2 * 3;
+    output: 7
+
+    roep "Hallo " + "Wereld!";
     output: Hallo Wereld!
+        
+    roep "average = " + (1 + 3) / 2;
+    output: 15
     ```
   - Logic operators that can be chained
-    - Logic operators supported are ==, >, <, >=, <= !=, !, //
+    - Supported logical operators are ==, >, <, >=, <= !=, !, //
     ```
-    5 == 2 + 3
+    roep 5 == 2 + 3;
     output: wellus
   
-    1 < 3
-    output: wellus
-  
-    (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4)
-    output: wellus
-  
-    wellus == !nietus == !!wellus
+    roep (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4);
     output: wellus
     ```
--
 - Dynamically typed mutable variables
   ```
   laat breedte = 3;
@@ -53,28 +45,45 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   roep "oppervlakte = " + breedte * lengte;
   output: oppervlakte = 15
   ```
+- Control flow with if statements
+  ```
+  als variabele < 0
+    roep "negatief nummer";
+  anders als variabele > 0
+    roep "positief nummer";
+  anders
+    roep "het nummer is 0";
+  ```
+  ```
+  als leeftijd >= 18 en leeftijd < 65
+    roep "Je bent een werkende volwassene.";
+  anders als leeftijd < 18 of leeftijd >= 65
+    roep "Je bent niet in de volwassen leeftijdsgroep.";
+  ```
 
 <H2>How do I use Rox?</H2>
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
 
 
-
-- execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
+- Create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
+  ```
+  cargo run
+  ```
+  
+- Or execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
   ```
   cargo run "1 + 1"
   output: 2
   ```
-- Or create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
-  ```
-  cargo run
-  ```
+
 
 <H2>Roadmap</H2>
 
-- Add control flow (💀)
+- Add loops (💀)
 - Add enums
 - Remove null and replace it with Option<T> enum
 - multiplication on strings
+- ✅ Add if statements
 - ✅ Add variable scope
 - ✅ Add (nested) multi-line comments with /* */
 - ✅ Add variables
