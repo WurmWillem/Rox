@@ -12,10 +12,10 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 
 <H2>Features</H2>
 
-- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, laat, ...)
+- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, terwijl, ...)
 - Memory safe, as it is written in 100% safe Rust
 - Expressive expressions
-  - Arithmetic with proper precedence rules (similair to C-like languages)
+  - Arithmetic with proper precedence rules (similiar to C-like languages)
     - Supported operators are +, -, *, /, ^ (raises a number to a given power, e.g. 2^3 = 8) 
       
     ```
@@ -61,7 +61,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   anders als leeftijd < 18 of leeftijd >= 65
     roep "Je bent niet in de volwassen leeftijdsgroep.";
   ```
-- While and for loops
+- While and for loops (both examples print the digits 0 up to and including 9)
   ```
   laat i = 0;
   terwijl x < 10 {
@@ -93,10 +93,12 @@ You can either download the source code or ask me for a binary and I'll send you
 
 <H2>Roadmap</H2>
 
-- Add loops (💀)
+- Add functions
 - Add enums
 - Remove null and replace it with Option<T> enum
-- multiplication on strings
+- Add more string related operations on strings
+- Add some syntactic sugar for mutating variables (+=, -=, *=, /=, ++, --)
+- ✅ Add loops
 - ✅ Add if statements
 - ✅ Add variable scope
 - ✅ Add (nested) multi-line comments with /* */
