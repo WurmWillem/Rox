@@ -26,7 +26,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
     output: Hallo Wereld!
         
     roep "average = " + (1 + 3) / 2;
-    output: 15
+    output: average = 15
     ```
   - Logic operators that can be chained
     - Supported logical operators are ==, >, <, >=, <= !=, !, //
@@ -53,6 +53,7 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
     roep "positief nummer";
   anders
     roep "het nummer is 0";
+  // The indentation is purely for readability reasons, Rox does not care about indentation.
   ```
   ```
   als leeftijd >= 18 en leeftijd < 65
@@ -60,6 +61,19 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
   anders als leeftijd < 18 of leeftijd >= 65
     roep "Je bent niet in de volwassen leeftijdsgroep.";
   ```
+- While and for loops
+  ```
+  laat i = 0;
+  terwijl x < 10 {
+    roep x;
+    i = i + 1;
+  }
+  ```
+  ```
+  voor i = 5 tot 0
+    roep i;
+  ```
+
 
 <H2>How do I use Rox?</H2>
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
