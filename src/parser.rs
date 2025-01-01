@@ -37,7 +37,7 @@ impl Parser {
     fn var_declaration(&mut self) -> Stmt {
         let name = self.consume(
             TokenType::Identifier,
-            "Je moet wel een naam aan de var geven",
+            "Je moet wel een naam aan de variabele geven",
         );
 
         let mut value = Expr::Lit(Literal::Nil);
@@ -57,9 +57,7 @@ impl Parser {
         } else if self.matches(vec![TokenType::LeftBrace]) {
             return self.block_statement();
         } else if self.matches(vec![TokenType::If]) {
-            let expr = self.expression();
-            let block = self.statement();
-            return Stmt::If(expr, Box::new(block));
+            return self.if_statement();
         }
         self.expr_statement()
     }
@@ -72,6 +70,18 @@ impl Parser {
 
         self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor");
         Stmt::Block(statements)
+    }
+
+    fn if_statement(&mut self) -> Stmt {
+        let bool = self.expression();
+        let then = self.statement();
+
+        let mut other = None;
+        if self.matches(vec![TokenType::Else]) {
+            other = Some(Box::new(self.statement()));
+        }
+
+        Stmt::If(bool, Box::new(then), other)
     }
 
     fn print_statement(&mut self) -> Stmt {
@@ -97,7 +107,7 @@ impl Parser {
     }
 
     fn assignment(&mut self) -> Expr {
-        let expr = self.equality();
+        let expr = self.or();
 
         if self.matches(vec![TokenType::Equal]) {
             let equals = self.previous();
@@ -110,6 +120,30 @@ impl Parser {
         }
 
         expr
+    }
+
+    fn or(&mut self) -> Expr {
+        let left = self.and();
+
+        while self.matches(vec![TokenType::Or]) {
+            let op = self.previous();
+            let right = self.and();
+            return Expr::Logic(Box::new(left), op, Box::new(right));
+        }
+
+        left
+    }
+
+    fn and(&mut self) -> Expr {
+        let left = self.equality();
+
+        while self.matches(vec![TokenType::And]) {
+            let op = self.previous();
+            let right = self.equality();
+            return Expr::Logic(Box::new(left), op, Box::new(right));
+        }
+
+        left
     }
 
     fn equality(&mut self) -> Expr {

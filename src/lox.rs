@@ -22,7 +22,7 @@ impl Lox {
         let mut parser = Parser::new(tokens);
         let expr = parser.parse_expr();
         if PRINT_PARS_OUTPUT {
-           println!("{}", expr.to_string()); 
+            println!("{}", expr.to_string());
         }
 
         let mut interpreter = Interpreter::new();

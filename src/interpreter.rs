@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::{crash, environment::Env, expr::Expr, stmt::Stmt, token_type::TokenType, value::Value};
 
 pub struct Interpreter {
@@ -5,9 +7,7 @@ pub struct Interpreter {
 }
 impl Interpreter {
     pub fn new() -> Self {
-        Self {
-            env: Env::new(),
-        }
+        Self { env: Env::new() }
     }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
@@ -34,11 +34,13 @@ impl Interpreter {
             Stmt::Block(statements) => {
                 self.evaluate_block(statements);
             }
-            Stmt::If(expr, block) => {
+            Stmt::If(expr, then, other) => {
                 let should_execute = self.evaluate_expr(expr);
+
                 if let Value::True = should_execute {
-                    self.evaluate_stmt(block);
-                    //self.evaluate_block(statements, Env::new(Some(Box::new(self.env.clone()))));
+                    self.evaluate_stmt(then);
+                } else if let Some(other) = other {
+                    self.evaluate_stmt(other);
                 }
             }
         }
@@ -153,6 +155,27 @@ impl Interpreter {
                 }
                 new_value
             }
+            Expr::Logic(left, op, right) => match op.kind {
+                TokenType::And => {
+                    if let Value::True = self.evaluate_expr(left) {
+                        if let Value::True = self.evaluate_expr(right) {
+                            return Value::True;
+                        }
+                    }
+                    Value::False
+                }
+
+                TokenType::Or => {
+                    if let Value::True = self.evaluate_expr(left) {
+                        return Value::True;
+                    }
+                    if let Value::True = self.evaluate_expr(right) {
+                        return Value::True;
+                    }
+                    Value::False
+                }
+                _ => panic!("Unreachable."),
+            },
         }
     }
 }

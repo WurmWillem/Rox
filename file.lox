@@ -1,15 +1,7 @@
-laat x = 5;
-{
-  x = 4;
-  roep "voor " + x;
-  {
-    x = 1;
-    roep "in " + x;
-  }
-  roep "in " + x;
-}
-roep "na " + x;
-
+als 3 == 3 en !wellus of wellus
+  roep "hey";
+anders
+  roep "niet hey";
 
 /*
 laat x = 1 + 2;

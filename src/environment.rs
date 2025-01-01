@@ -49,7 +49,7 @@ impl Env {
             if let Ok(()) = child.replace_value(name, &new_value) {
                 return Ok(());
             }
-        } 
+        }
         if let Some(old_value) = self.vars.get_mut(&name.lexeme) {
             *old_value = new_value.clone();
             Ok(())
