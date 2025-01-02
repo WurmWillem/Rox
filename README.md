@@ -98,6 +98,7 @@ You can either download the source code or ask me for a binary and I'll send you
 - Remove null and replace it with Option<T> enum
 - Add more string related operations on strings
 - Add some syntactic sugar for mutating variables (+=, -=, *=, /=, ++, --)
+- Add break and continue statements
 - ✅ Add loops
 - ✅ Add if statements
 - ✅ Add variable scope
