@@ -21,10 +21,15 @@ impl Env {
         }
     }
 
-    pub fn kill_youngest_child(&mut self) {
+    pub fn kill_youngest_child(&mut self) -> bool {
         match &mut self.child {
-            Some(child) => child.kill_youngest_child(),
-            None => self.child = None,
+            Some(child) => {
+                if !child.kill_youngest_child() {
+                    self.child = None; 
+                }
+                true
+            }
+            None => false,
         }
     }
 
@@ -55,7 +60,7 @@ impl Env {
             *old_value = new_value.clone();
             Ok(())
         } else {
-            Err(format!("{} is een onbekende variabele.", name.lexeme))
+            Err(format!("'{}' is een onbekende variabele.", name.lexeme))
         }
     }
 }

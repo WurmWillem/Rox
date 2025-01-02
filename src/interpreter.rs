@@ -91,6 +91,7 @@ impl Interpreter {
         let end_value = self.evaluate_expr(end);
 
         if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
+            self.env.create_new_child();
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
@@ -110,6 +111,7 @@ impl Interpreter {
                     crash(name.line, &msg)
                 }
             }
+            self.env.kill_youngest_child();
         } else {
             panic!("Unreachable.");
         }
@@ -265,7 +267,7 @@ impl Interpreter {
             Some(value) => value,
             None => crash(
                 token.line,
-                &format!("{} is een onbekende variabele.", token.lexeme),
+                &format!("'{}' is een onbekende variabele.", token.lexeme),
             ),
         }
     }
