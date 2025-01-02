@@ -1,7 +1,12 @@
 use core::panic;
 
 use crate::{
-    crash, environment::Env, expr::Expr, stmt::Stmt, token::Token, token_type::TokenType,
+    crash,
+    environment::Env,
+    expr::Expr,
+    stmt::{If, Stmt},
+    token::Token,
+    token_type::TokenType,
     value::Value,
 };
 
@@ -24,42 +29,18 @@ impl Interpreter {
             Stmt::Expr(expr) => {
                 self.evaluate_expr(expr);
             }
-            Stmt::Print(expr) => {
-                print!("{}", self.evaluate_expr(expr).to_string());
-            }
-            Stmt::Println(expr) => {
-                println!("{}", self.evaluate_expr(expr).to_string());
-            }
+
+            Stmt::Print(expr) => print!("{}", self.evaluate_expr(expr).to_string()),
+            Stmt::Println(expr) => println!("{}", self.evaluate_expr(expr).to_string()),
+
             Stmt::Var(token, expr) => {
                 let value = self.evaluate_expr(expr);
                 self.env.insert_value(&token.lexeme, value);
             }
-            Stmt::Block(statements) => {
-                self.evaluate_block(statements);
-            }
-            Stmt::If(first_if, else_ifs, other) => {
-                if let Value::True = self.evaluate_expr(&first_if.should_execute) {
-                    // execute first if is true
-                    self.evaluate_stmt(&first_if.statement);
-                } else {
-                    // check for other else_ifs
-                    let mut else_if_executed = false;
-                    for else_if in else_ifs {
-                        if let Value::True = self.evaluate_expr(&else_if.should_execute) {
-                            self.evaluate_stmt(&else_if.statement);
-                            else_if_executed = true;
-                            break;
-                        }
-                    }
 
-                    // execute if there is an else and no else_ifs were executed
-                    if !else_if_executed {
-                        if let Some(other) = other {
-                            self.evaluate_stmt(other);
-                        }
-                    }
-                }
-            }
+            Stmt::Block(statements) => self.evaluate_block_stmt(statements),
+
+            Stmt::If(first_if, else_ifs, other) => self.evaluate_if_stmt(first_if, else_ifs, other),
 
             Stmt::While(expr, statement) => {
                 while let Value::True = self.evaluate_expr(expr) {
@@ -68,42 +49,12 @@ impl Interpreter {
             }
 
             Stmt::For(name, start, end, statement) => {
-                let start_value = self.evaluate_expr(start);
-                let end_value = self.evaluate_expr(end);
-
-                // Ensure start and end are both numbers
-                if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
-                    // Initialize the loop variable in the environment
-
-                    self.env.insert_value(&name.lexeme, Value::Num(current));
-
-                    while current < end {
-                        // Execute the loop body
-                        self.evaluate_stmt(statement);
-
-                        current += 1.0;
-                        if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
-                            crash(name.line, &msg)
-                        }
-                    }
-
-                    while current > end {
-                        // Execute the loop body
-                        self.evaluate_stmt(statement);
-
-                        current -= 1.0;
-                        if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
-                            crash(name.line, &msg)
-                        }
-                    }
-                } else {
-                    panic!("Unreachable.");
-                }
+                self.evaluate_for_stmt(name, start, end, statement)
             }
         }
     }
 
-    fn evaluate_block(&mut self, statements: &Vec<Stmt>) {
+    fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) {
         self.env.create_new_child();
         for stmt in statements {
             self.evaluate_stmt(stmt);
@@ -111,19 +62,73 @@ impl Interpreter {
         self.env.kill_youngest_child();
     }
 
+    fn evaluate_if_stmt(&mut self, first_if: &If, else_ifs: &Vec<If>, other: &Option<Box<Stmt>>) {
+        if let Value::True = self.evaluate_expr(&first_if.should_execute) {
+            // execute the first if
+            self.evaluate_stmt(&first_if.statement);
+        } else {
+            // check for other else_ifs
+            let mut else_if_executed = false;
+            for else_if in else_ifs {
+                if let Value::True = self.evaluate_expr(&else_if.should_execute) {
+                    self.evaluate_stmt(&else_if.statement);
+                    else_if_executed = true;
+                    break;
+                }
+            }
+
+            // execute if there is an else and no else_ifs were executed
+            if !else_if_executed {
+                if let Some(other) = other {
+                    self.evaluate_stmt(other);
+                }
+            }
+        }
+    }
+
+    fn evaluate_for_stmt(&mut self, name: &Token, start: &Expr, end: &Expr, statement: &Stmt) {
+        let start_value = self.evaluate_expr(start);
+        let end_value = self.evaluate_expr(end);
+
+        if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
+            // Initialize the loop variable in the environment
+            self.env.insert_value(&name.lexeme, Value::Num(current));
+
+            while current < end {
+                self.evaluate_stmt(statement);
+
+                current += 1.0;
+                if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                    crash(name.line, &msg)
+                }
+            }
+
+            while current > end {
+                self.evaluate_stmt(statement);
+
+                current -= 1.0;
+                if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                    crash(name.line, &msg)
+                }
+            }
+        } else {
+            panic!("Unreachable.");
+        }
+    }
+
     pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
         match expr {
             Expr::Lit(lit) => Value::from_lit(&lit),
             Expr::Grouping(expr) => self.evaluate_expr(expr),
-            Expr::Unary(token, expr) => self.evaluate_unary(token, expr),
-            Expr::Binary(left, op, right) => self.evaluate_binary(left, op, right),
-            Expr::Var(token) => self.evaluate_var(token),
-            Expr::Assign(name, expr) => self.evaluate_assign(name, expr),
-            Expr::Logic(left, op, right) => self.evaluate_logic(left, op, right),
+            Expr::Unary(token, expr) => self.evaluate_unary_expr(token, expr),
+            Expr::Binary(left, op, right) => self.evaluate_binary_expr(left, op, right),
+            Expr::Var(token) => self.evaluate_var_expr(token),
+            Expr::Assign(name, expr) => self.evaluate_assign_expr(name, expr),
+            Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
         }
     }
 
-    fn evaluate_unary(&mut self, token: &Token, expr: &Box<Expr>) -> Value {
+    fn evaluate_unary_expr(&mut self, token: &Token, expr: &Box<Expr>) -> Value {
         let right = self.evaluate_expr(expr);
 
         match token.kind {
@@ -145,7 +150,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_binary(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
+    fn evaluate_binary_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
         let left = self.evaluate_expr(left);
         let right = self.evaluate_expr(right);
 
@@ -200,13 +205,14 @@ impl Interpreter {
             TokenType::Less => apply_logic_to_nums!(Less, <),
             TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
             TokenType::Equal => apply_logic_to_nums!(Equal, ==),
+
             TokenType::EqualEqual => Value::from_bool(Value::is_equal(&left, &right)),
             TokenType::BangEqual => Value::from_bool(!Value::is_equal(&left, &right)),
             _ => panic!("Unreachable."),
         }
     }
 
-    fn evaluate_logic(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
+    fn evaluate_logic_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
         match op.kind {
             TokenType::And => {
                 let left = self.evaluate_expr(left).is_true();
@@ -255,7 +261,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_var(&mut self, token: &Token) -> Value {
+    fn evaluate_var_expr(&mut self, token: &Token) -> Value {
         match self.env.get_value(&token) {
             Some(value) => value,
             None => crash(
@@ -265,7 +271,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_assign(&mut self, name: &Token, expr: &Box<Expr>) -> Value {
+    fn evaluate_assign_expr(&mut self, name: &Token, expr: &Box<Expr>) -> Value {
         let new_value = self.evaluate_expr(expr);
         if let Err(msg) = self.env.replace_value(name, &new_value) {
             crash(name.line, &msg)
