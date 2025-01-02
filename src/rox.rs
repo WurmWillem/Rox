@@ -6,10 +6,10 @@ const PRINT_SCAN_OUTPUT: bool = false;
 const PRINT_PARS_OUTPUT: bool = false;
 //const PRINT_INTERPRETER :bool = false;
 
-pub struct Lox {
+pub struct Rox {
     //had_error: bool,
 }
-impl Lox {
+impl Rox {
     pub fn new() -> Self {
         //Self { had_error: false }
         Self {}

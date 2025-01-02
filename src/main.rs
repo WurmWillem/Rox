@@ -1,12 +1,12 @@
 use std::env;
 
 use colored::Colorize;
-use lox::Lox;
+use rox::Rox;
 
 mod environment;
 mod expr;
 mod interpreter;
-mod lox;
+mod rox;
 mod parser;
 mod scanner;
 mod stmt;
@@ -15,7 +15,7 @@ mod token_type;
 mod value;
 
 fn main() {
-    let mut lox = Lox::new();
+    let mut lox = Rox::new();
 
     let args: Vec<String> = env::args().collect();
     //env::set_var("RUST_BACKTRACE", "1");
