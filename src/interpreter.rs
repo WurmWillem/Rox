@@ -19,8 +19,8 @@ impl Interpreter {
     }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
-        for i in 0..statements.len() {
-            self.evaluate_stmt(&statements[i]);
+        for statement in statements {
+            self.evaluate_stmt(&statement);
         }
     }
 
@@ -91,14 +91,13 @@ impl Interpreter {
         let end_value = self.evaluate_expr(end);
 
         if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
-            // Initialize the loop variable in the environment
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
                 self.evaluate_stmt(statement);
 
                 current += 1.0;
-                if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     crash(name.line, &msg)
                 }
             }
@@ -107,7 +106,7 @@ impl Interpreter {
                 self.evaluate_stmt(statement);
 
                 current -= 1.0;
-                if let Err(msg) = self.env.replace_value(&name, &Value::Num(current)) {
+                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     crash(name.line, &msg)
                 }
             }
@@ -118,7 +117,7 @@ impl Interpreter {
 
     pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
         match expr {
-            Expr::Lit(lit) => Value::from_lit(&lit),
+            Expr::Lit(lit) => Value::from_lit(lit),
             Expr::Grouping(expr) => self.evaluate_expr(expr),
             Expr::Unary(token, expr) => self.evaluate_unary_expr(token, expr),
             Expr::Binary(left, op, right) => self.evaluate_binary_expr(left, op, right),
@@ -212,7 +211,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_logic_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
+    fn evaluate_logic_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Expr) -> Value {
         match op.kind {
             TokenType::And => {
                 let left = self.evaluate_expr(left).is_true();
@@ -271,7 +270,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_assign_expr(&mut self, name: &Token, expr: &Box<Expr>) -> Value {
+    fn evaluate_assign_expr(&mut self, name: &Token, expr: &Expr) -> Value {
         let new_value = self.evaluate_expr(expr);
         if let Err(msg) = self.env.replace_value(name, &new_value) {
             crash(name.line, &msg)

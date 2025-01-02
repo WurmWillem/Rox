@@ -133,7 +133,7 @@ impl Scanner {
             '\n' => self.line += 1,
 
             _ => {
-                if c.is_digit(10) {
+                if c.is_ascii_digit() {
                     self.add_num_token()
                 } else if c.is_alphabetic() || c == '_' {
                     while self.peek().is_alphanumeric() {
@@ -202,19 +202,19 @@ impl Scanner {
     }
 
     fn add_num_token(&mut self) {
-        while self.peek().is_digit(10) {
+        while self.peek().is_ascii_digit() {
             self.current += 1;
         }
 
-        if self.peek() == '.' && self.peek_next().is_digit(10) {
+        if self.peek() == '.' && self.peek_next().is_ascii_digit() {
             self.current += 1;
 
-            while self.peek().is_digit(10) {
+            while self.peek().is_ascii_digit() {
                 self.current += 1;
             }
         }
 
-        let num = self.source[(self.start + 0)..(self.current - 0)].to_string();
+        let num = self.source[self.start..self.current].to_string();
         let num = num.parse::<f64>().unwrap();
         self.add_lit_token(TokenType::Number, Literal::Num(num))
     }
