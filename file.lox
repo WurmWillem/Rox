@@ -1,5 +1,11 @@
-voor i = 5 tot 0
-  roep i;
+laat previous = 1;
+laat current = 1;
+
+voor i van 0 tot 98 {
+  current = previous + current;
+  previous = current - previous;
+}
+roep current;
 
 /*
 laat x = 1 + 2;

@@ -15,12 +15,6 @@ mod token_type;
 mod value;
 
 fn main() {
-    //let mut x = 5;
-    //{
-    //    x = 3;
-    //    println!("{}", x);
-    //}
-    //println!("{}", x);
     let mut lox = Lox::new();
 
     let args: Vec<String> = env::args().collect();

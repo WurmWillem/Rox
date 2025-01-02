@@ -107,7 +107,7 @@ impl Parser {
             TokenType::Identifier,
             "Je moet wel een naam aan de variabele geven.",
         );
-        self.consume(TokenType::Equal, "Verwachtte '='.");
+        self.consume(TokenType::From, "Verwachtte 'van'.");
 
         let start = self.expression();
         self.consume(TokenType::Until, "Verwachtte 'tot'.");
