@@ -244,15 +244,44 @@ impl Parser {
     }
 
     fn power(&mut self) -> Expr {
-        let mut expr = self.primary();
+        let mut expr = self.call();
 
         while self.matches(vec![TokenType::Caret]) {
             let op = self.previous();
-            let right = self.primary();
+            let right = self.call();
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
         expr
+    }
+
+    fn call(&mut self) -> Expr {
+        let mut expr = self.primary();
+
+        loop {
+            if self.matches(vec![TokenType::LeftParen]) {
+                expr = self.finish_call(expr.clone());
+            } else {
+                break;
+            }
+        }
+
+        expr
+    }
+
+    fn finish_call(&mut self, callee: Expr) -> Expr {
+        let mut arguments = Vec::new();
+
+        if !self.check(TokenType::RightParen) {
+            arguments.push(Box::new(self.expression()));
+            while self.matches(vec![TokenType::Comma]) {
+                arguments.push(Box::new(self.expression()));
+            }
+        }
+
+        let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten");
+
+        Expr::Call(Box::new(callee), token, arguments)
     }
 
     fn primary(&mut self) -> Expr {
