@@ -10,7 +10,7 @@ pub enum Stmt {
     If(If, Vec<If>, Option<Box<Stmt>>),
     While(Expr, Box<Stmt>),
     For(Token, Expr, Expr, Box<Stmt>),
-    //Function(Token, Vec<Token>, 
+    Function(Token, Vec<Token>, Box<Stmt>),
 }
 
 pub struct If {

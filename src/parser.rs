@@ -30,6 +30,8 @@ impl Parser {
     fn declaration(&mut self) -> Stmt {
         if self.matches(vec![TokenType::Var]) {
             return self.var_declaration();
+        } else if self.matches(vec![TokenType::Fun]) {
+            return self.fun_declaration("function");
         }
         self.statement()
     }
@@ -49,19 +51,30 @@ impl Parser {
         Stmt::Var(name, value)
     }
 
-    fn fn_declaration(&mut self) -> Stmt {
-        let name = self.consume(
-            TokenType::Identifier,
-            "Je moet wel een naam aan de variabele geven",
-        );
+    fn fun_declaration(&mut self, kind: &str) -> Stmt {
+        let msg = format!("Je moet wel een naam aan de {} geven", kind);
+        let name = self.consume(TokenType::Identifier, &msg);
 
-        let mut value = Expr::Lit(Literal::Nil);
-        if self.matches(vec![TokenType::Equal]) {
-            value = self.expression();
+        let msg = format!("Verwachtte '(' na de {} naam.", kind);
+        self.consume(TokenType::LeftParen, &msg);
+
+        let mut params = Vec::new();
+        if !self.matches(vec![TokenType::RightParen]) {
+            params.push(self.consume(TokenType::Identifier, "Verwachtte parameter."));
+
+            while self.matches(vec![TokenType::Comma]) {
+                params.push(self.consume(TokenType::Identifier, "Verwachtte parameter."))
+            }
         }
 
-        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
-        Stmt::Var(name, value)
+        self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.");
+
+        let msg = format!("Verwachtte '{{' voor de {} naam.", kind);
+        self.consume(TokenType::LeftBrace, &msg);
+
+        let body = Box::new(self.block_statement());
+
+        Stmt::Function(name, params, body)
     }
 
     fn statement(&mut self) -> Stmt {

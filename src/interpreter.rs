@@ -55,6 +55,7 @@ impl Interpreter {
             Stmt::For(name, start, end, statement) => {
                 self.evaluate_for_stmt(name, start, end, statement)
             }
+            Stmt::Function(_, _, _) => todo!(),
         }
     }
 
@@ -139,8 +140,12 @@ impl Interpreter {
 
                 if let Value::Callable(callee) = callee {
                     if callee.arity() != arguments.len() {
-                        let msg = format!("Verwachtte {} argumenten maar kreeg er {}", callee.arity(), arguments.len());
-                       crash(right_paren.line, &msg); 
+                        let msg = format!(
+                            "Verwachtte {} argumenten maar kreeg er {}",
+                            callee.arity(),
+                            arguments.len(),
+                        );
+                        crash(right_paren.line, &msg);
                     }
                     callee.call(arguments)
                 } else {
