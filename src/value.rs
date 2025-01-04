@@ -1,4 +1,4 @@
-use crate::token::Literal;
+use crate::{callable::Callable, token::Literal};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -7,6 +7,7 @@ pub enum Value {
     False,
     Num(f64),
     Str(String),
+    Callable(Box<dyn Callable>),
 }
 impl Value {
     pub fn to_string(&self) -> String {
@@ -16,6 +17,7 @@ impl Value {
             Value::False => "nietus".to_string(),
             Value::Num(num) => num.to_string(),
             Value::Str(str) => str.to_string(),
+            Value::Callable(_) => todo!(),
         }
     }
 

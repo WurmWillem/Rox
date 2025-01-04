@@ -1,13 +1,5 @@
-use core::panic;
-
 use crate::{
-    crash,
-    environment::Env,
-    expr::Expr,
-    stmt::{If, Stmt},
-    token::Token,
-    token_type::TokenType,
-    value::Value,
+    callable::Clock, crash, environment::Env, expr::Expr, stmt::{If, Stmt}, token::Token, token_type::TokenType, value::Value
 };
 
 pub struct Interpreter {
@@ -15,6 +7,11 @@ pub struct Interpreter {
 }
 impl Interpreter {
     pub fn new() -> Self {
+        let mut env = Env::new();
+
+        let clock = Value::Callable(Box::new(Clock {}));
+        env.insert_value(&"clock".to_string(), clock);
+
         Self { env: Env::new() }
     }
 
@@ -126,6 +123,12 @@ impl Interpreter {
             Expr::Var(token) => self.evaluate_var_expr(token),
             Expr::Assign(name, expr) => self.evaluate_assign_expr(name, expr),
             Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
+            Expr::Call(callee, right_paren, arguments) => {
+                let callee = self.evaluate_expr(callee);
+                let arguments: Vec<Value> = arguments.iter().map(|arg| self.evaluate_expr(arg)).collect();
+                todo!();
+                callee
+            }
         }
     }
 

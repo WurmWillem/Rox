@@ -3,11 +3,12 @@ use std::env;
 use colored::Colorize;
 use rox::Rox;
 
+mod callable;
 mod environment;
 mod expr;
 mod interpreter;
-mod rox;
 mod parser;
+mod rox;
 mod scanner;
 mod stmt;
 mod token;
@@ -22,7 +23,7 @@ fn main() {
 
     if arguments.len() == 1 {
         // run lox code from a file
-        lox.run_file("file.lox");
+        lox.run_file("file.rox");
     } else {
         // run lox code from a prompt
         let mut input = String::new();
