@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::value::Value;
 
@@ -30,8 +30,11 @@ where
 pub struct Clock;
 impl Callable for Clock {
     fn call(&self) -> Value {
-        let current_time = Instant::now().elapsed().as_millis() as f64;
-        Value::Num(current_time / 1000.)
+        let current_time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs_f64();
+        Value::Num(current_time)
     }
 
     fn arity(&self) -> usize {

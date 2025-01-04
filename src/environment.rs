@@ -33,6 +33,10 @@ impl Env {
         }
     }
 
+    pub fn insert_global_value(&mut self, name: String, value: Value) {
+        self.vars.insert(name, value);
+    }
+
     pub fn insert_value(&mut self, name: &String, value: Value) {
         if let Some(ref mut child) = self.child {
             child.insert_value(&name, value);

@@ -1,5 +1,12 @@
 use crate::{
-    callable::Clock, crash, environment::Env, expr::Expr, stmt::{If, Stmt}, token::Token, token_type::TokenType, value::Value
+    callable::Clock,
+    crash,
+    environment::Env,
+    expr::Expr,
+    stmt::{If, Stmt},
+    token::Token,
+    token_type::TokenType,
+    value::Value,
 };
 
 pub struct Interpreter {
@@ -10,9 +17,9 @@ impl Interpreter {
         let mut env = Env::new();
 
         let clock = Value::Callable(Box::new(Clock {}));
-        env.insert_value(&"clock".to_string(), clock);
+        env.insert_global_value("clock".to_string(), clock);
 
-        Self { env: Env::new() }
+        Self { env }
     }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) {
@@ -125,9 +132,16 @@ impl Interpreter {
             Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
             Expr::Call(callee, right_paren, arguments) => {
                 let callee = self.evaluate_expr(callee);
-                let arguments: Vec<Value> = arguments.iter().map(|arg| self.evaluate_expr(arg)).collect();
-                todo!();
-                callee
+                let arguments: Vec<Value> = arguments
+                    .iter()
+                    .map(|arg| self.evaluate_expr(arg))
+                    .collect();
+
+                if let Value::Callable(callee) = callee {
+                    callee.call()
+                } else {
+                    panic!("Unreachable.");
+                }
             }
         }
     }

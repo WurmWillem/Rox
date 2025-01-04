@@ -1,4 +1,17 @@
-roep 2^3;
+laat now = clock();
+
+laat prev = 1;
+laat curr = 1;
+voor i van 0 tot 10^7 {
+  //curr = curr + prev;
+  //prev = curr - prev;
+  roep i;
+}
+
+laat new = clock();
+roep now;
+roep new;
+roep new - now;
 
 
 /*
