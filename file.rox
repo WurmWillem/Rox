@@ -3,7 +3,7 @@ proces hey(x) {
 }
 
 hey(5);
-roep hey(5);
+roep clock;
 
 
 

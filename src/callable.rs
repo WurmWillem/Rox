@@ -5,6 +5,7 @@ use crate::{interpreter::Interpreter, stmt::Stmt, value::Value};
 pub trait Callable: std::fmt::Debug + CallableClone {
     fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Value;
     fn arity(&self) -> usize;
+    fn to_string(&self) -> String;
 }
 impl Clone for Box<dyn Callable> {
     fn clone(&self) -> Box<dyn Callable> {
@@ -39,6 +40,10 @@ impl Callable for Clock {
 
     fn arity(&self) -> usize {
         0
+    }
+
+    fn to_string(&self) -> String {
+        "clock".to_string()
     }
 }
 
@@ -76,5 +81,9 @@ impl Callable for Function {
             panic!("Unreachable.");
         };
         params.len()
+    }
+
+    fn to_string(&self) -> String {
+        todo!()
     }
 }
