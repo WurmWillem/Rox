@@ -1,9 +1,9 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::value::Value;
+use crate::{interpreter::Interpreter, stmt::Stmt, value::Value};
 
 pub trait Callable: std::fmt::Debug + CallableClone {
-    fn call(&self, arguments: Vec<Value>) -> Value;
+    fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Value;
     fn arity(&self) -> usize;
 }
 impl Clone for Box<dyn Callable> {
@@ -29,7 +29,7 @@ where
 #[derive(Debug, Clone)]
 pub struct Clock;
 impl Callable for Clock {
-    fn call(&self, _: Vec<Value>) -> Value {
+    fn call(&self, _: Vec<Value>, _: &mut Interpreter) -> Value {
         let current_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -39,5 +39,42 @@ impl Callable for Clock {
 
     fn arity(&self) -> usize {
         0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Function {
+    declaration: Stmt,
+}
+impl Function {
+    pub fn new(declaration: Stmt) -> Self {
+        Self { declaration }
+    }
+}
+impl Callable for Function {
+    fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Value {
+        interpreter.env.create_new_child();
+
+        let Stmt::Function(_, params, block) = &self.declaration else {
+            panic!("Unreachable.");
+        };
+
+        for i in 0..params.len() {
+            interpreter
+                .env
+                .insert_value(&params[i].lexeme, arguments[i].clone())
+        }
+
+        interpreter.evaluate_stmt(&block);
+
+        interpreter.env.kill_youngest_child();
+        Value::Nil
+    }
+
+    fn arity(&self) -> usize {
+        let Stmt::Function(_, params, _) = &self.declaration else {
+            panic!("Unreachable.");
+        };
+        params.len()
     }
 }

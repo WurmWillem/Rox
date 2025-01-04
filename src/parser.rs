@@ -31,7 +31,7 @@ impl Parser {
         if self.matches(vec![TokenType::Var]) {
             return self.var_declaration();
         } else if self.matches(vec![TokenType::Fun]) {
-            return self.fun_declaration("function");
+            return self.fun_declaration("functie");
         }
         self.statement()
     }
@@ -60,16 +60,16 @@ impl Parser {
 
         let mut params = Vec::new();
         if !self.matches(vec![TokenType::RightParen]) {
-            params.push(self.consume(TokenType::Identifier, "Verwachtte parameter."));
+            params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma."));
 
             while self.matches(vec![TokenType::Comma]) {
-                params.push(self.consume(TokenType::Identifier, "Verwachtte parameter."))
+                params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma."))
             }
         }
 
         self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.");
 
-        let msg = format!("Verwachtte '{{' voor de {} naam.", kind);
+        let msg = format!("Verwachtte '{{' na de {} naam.", kind);
         self.consume(TokenType::LeftBrace, &msg);
 
         let body = Box::new(self.block_statement());

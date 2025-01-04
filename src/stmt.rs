@@ -1,6 +1,7 @@
 use crate::expr::Expr;
 use crate::token::Token;
 
+#[derive(Debug, Clone)]
 pub enum Stmt {
     Expr(Expr),
     Print(Expr),
@@ -13,6 +14,7 @@ pub enum Stmt {
     Function(Token, Vec<Token>, Box<Stmt>),
 }
 
+#[derive(Debug, Clone)]
 pub struct If {
     pub should_execute: Expr,
     pub statement: Box<Stmt>,

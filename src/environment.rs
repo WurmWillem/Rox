@@ -25,7 +25,7 @@ impl Env {
         match &mut self.child {
             Some(child) => {
                 if !child.kill_youngest_child() {
-                    self.child = None; 
+                    self.child = None;
                 }
                 true
             }

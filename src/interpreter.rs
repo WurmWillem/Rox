@@ -1,5 +1,5 @@
 use crate::{
-    callable::Clock,
+    callable::{Clock, Function},
     crash,
     environment::Env,
     expr::Expr,
@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub struct Interpreter {
-    env: Env,
+    pub env: Env,
 }
 impl Interpreter {
     pub fn new() -> Self {
@@ -28,7 +28,7 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_stmt(&mut self, stmt: &Stmt) {
+    pub fn evaluate_stmt(&mut self, stmt: &Stmt) {
         match stmt {
             Stmt::Expr(expr) => {
                 self.evaluate_expr(expr);
@@ -55,7 +55,11 @@ impl Interpreter {
             Stmt::For(name, start, end, statement) => {
                 self.evaluate_for_stmt(name, start, end, statement)
             }
-            Stmt::Function(_, _, _) => todo!(),
+            Stmt::Function(name, params, body) => {
+                let function = Stmt::Function(name.clone(), params.clone(), body.clone());
+                let function = Value::Callable(Box::new(Function::new(function)));
+                self.env.insert_value(&name.lexeme, function);
+            }
         }
     }
 
@@ -147,7 +151,7 @@ impl Interpreter {
                         );
                         crash(right_paren.line, &msg);
                     }
-                    callee.call(arguments)
+                    callee.call(arguments, self)
                 } else {
                     crash(right_paren.line, "Je kan alleen functies en klassen bellen");
                 }

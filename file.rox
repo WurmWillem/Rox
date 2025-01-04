@@ -1,4 +1,18 @@
-laat now = clock();
+proces hey(x) {
+  roep x;
+}
+
+hey(5);
+roep hey(5);
+
+
+
+
+
+
+
+
+/*laat now = clock();
 
 laat prev = 1;
 laat curr = 1;
@@ -12,6 +26,7 @@ laat new = clock();
 roep now;
 roep new;
 roep new - now;
+*/
 
 
 /*
