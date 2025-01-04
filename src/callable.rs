@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::value::Value;
 
 pub trait Callable: std::fmt::Debug + CallableClone {
-    fn call(&self) -> Value;
+    fn call(&self, arguments: Vec<Value>) -> Value;
     fn arity(&self) -> usize;
 }
 impl Clone for Box<dyn Callable> {
@@ -29,7 +29,7 @@ where
 #[derive(Debug, Clone)]
 pub struct Clock;
 impl Callable for Clock {
-    fn call(&self) -> Value {
+    fn call(&self, _: Vec<Value>) -> Value {
         let current_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()

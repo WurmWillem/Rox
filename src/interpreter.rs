@@ -138,9 +138,13 @@ impl Interpreter {
                     .collect();
 
                 if let Value::Callable(callee) = callee {
-                    callee.call()
+                    if callee.arity() != arguments.len() {
+                        let msg = format!("Verwachtte {} argumenten maar kreeg er {}", callee.arity(), arguments.len());
+                       crash(right_paren.line, &msg); 
+                    }
+                    callee.call(arguments)
                 } else {
-                    panic!("Unreachable.");
+                    crash(right_paren.line, "Je kan alleen functies en klassen bellen");
                 }
             }
         }

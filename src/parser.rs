@@ -49,6 +49,21 @@ impl Parser {
         Stmt::Var(name, value)
     }
 
+    fn fn_declaration(&mut self) -> Stmt {
+        let name = self.consume(
+            TokenType::Identifier,
+            "Je moet wel een naam aan de variabele geven",
+        );
+
+        let mut value = Expr::Lit(Literal::Nil);
+        if self.matches(vec![TokenType::Equal]) {
+            value = self.expression();
+        }
+
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
+        Stmt::Var(name, value)
+    }
+
     fn statement(&mut self) -> Stmt {
         if self.matches(vec![TokenType::Print]) {
             return self.print_statement();

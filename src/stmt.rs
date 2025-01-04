@@ -1,6 +1,18 @@
 use crate::expr::Expr;
 use crate::token::Token;
 
+pub enum Stmt {
+    Expr(Expr),
+    Print(Expr),
+    Println(Expr),
+    Var(Token, Expr),
+    Block(Vec<Stmt>),
+    If(If, Vec<If>, Option<Box<Stmt>>),
+    While(Expr, Box<Stmt>),
+    For(Token, Expr, Expr, Box<Stmt>),
+    //Function(Token, Vec<Token>, 
+}
+
 pub struct If {
     pub should_execute: Expr,
     pub statement: Box<Stmt>,
@@ -12,15 +24,4 @@ impl If {
             statement: Box::new(statement),
         }
     }
-}
-
-pub enum Stmt {
-    Expr(Expr),
-    Print(Expr),
-    Println(Expr),
-    Var(Token, Expr),
-    Block(Vec<Stmt>),
-    If(If, Vec<If>, Option<Box<Stmt>>),
-    While(Expr, Box<Stmt>),
-    For(Token, Expr, Expr, Box<Stmt>),
 }
