@@ -60,7 +60,7 @@ impl Callable for Function {
     fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Value {
         interpreter.env.create_new_child();
 
-        let Stmt::Function(_, params, block) = &self.declaration else {
+        let Stmt::Function { params, body, .. } = &self.declaration else {
             panic!("Unreachable.");
         };
 
@@ -70,20 +70,23 @@ impl Callable for Function {
                 .insert_value(&params[i].lexeme, arguments[i].clone())
         }
 
-        interpreter.evaluate_stmt(&block);
+        interpreter.evaluate_stmt(&body);
 
         interpreter.env.kill_youngest_child();
         Value::Nil
     }
 
     fn arity(&self) -> usize {
-        let Stmt::Function(_, params, _) = &self.declaration else {
+        let Stmt::Function { params, .. } = &self.declaration else {
             panic!("Unreachable.");
         };
         params.len()
     }
 
     fn to_string(&self) -> String {
-        todo!()
+        let Stmt::Function { name, .. } = &self.declaration else {
+            panic!("Unreachable.");
+        };
+        name.lexeme.clone()
     }
 }

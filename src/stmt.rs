@@ -6,12 +6,31 @@ pub enum Stmt {
     Expr(Expr),
     Print(Expr),
     Println(Expr),
-    Var(Token, Expr),
+    Var {
+        name: Token,
+        expr: Expr,
+    },
     Block(Vec<Stmt>),
-    If(If, Vec<If>, Option<Box<Stmt>>),
-    While(Expr, Box<Stmt>),
-    For(Token, Expr, Expr, Box<Stmt>),
-    Function(Token, Vec<Token>, Box<Stmt>),
+    If {
+        first_if: If,
+        else_ifs: Vec<If>,
+        final_else: Option<Box<Stmt>>,
+    },
+    While {
+        condition: Expr,
+        body: Box<Stmt>,
+    },
+    For {
+        name: Token,
+        start: Expr,
+        end: Expr,
+        body: Box<Stmt>,
+    },
+    Function {
+        name: Token,
+        params: Vec<Token>,
+        body: Box<Stmt>,
+    },
 }
 
 #[derive(Debug, Clone)]

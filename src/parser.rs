@@ -48,7 +48,7 @@ impl Parser {
         }
 
         self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
-        Stmt::Var(name, value)
+        Stmt::Var { name, expr: value }
     }
 
     fn fun_declaration(&mut self, kind: &str) -> Stmt {
@@ -74,7 +74,7 @@ impl Parser {
 
         let body = Box::new(self.block_statement());
 
-        Stmt::Function(name, params, body)
+        Stmt::Function { name, params, body }
     }
 
     fn statement(&mut self) -> Stmt {
@@ -109,25 +109,29 @@ impl Parser {
 
         let mut else_ifs = Vec::new();
 
-        let mut other = None;
+        let mut final_else = None;
         while self.matches(vec![TokenType::Else]) {
             if self.matches(vec![TokenType::If]) {
                 let else_if = If::new(self.expression(), self.statement());
                 else_ifs.push(else_if);
             } else {
-                other = Some(Box::new(self.statement()));
+                final_else = Some(Box::new(self.statement()));
                 break;
             }
         }
 
-        Stmt::If(first_if, else_ifs, other)
+        Stmt::If {
+            first_if,
+            else_ifs,
+            final_else,
+        }
     }
 
     fn while_statement(&mut self) -> Stmt {
-        let expr = self.expression();
-        let statement = self.statement();
+        let condition = self.expression();
+        let body = Box::new(self.statement());
 
-        Stmt::While(expr, Box::new(statement))
+        Stmt::While { condition, body }
     }
 
     fn for_statement(&mut self) -> Stmt {
@@ -141,9 +145,9 @@ impl Parser {
         self.consume(TokenType::Until, "Verwachtte 'tot'.");
         let end = self.expression();
 
-        let statement = self.statement();
+        let body = Box::new(self.statement());
 
-        Stmt::For(name, start, end, Box::new(statement))
+        Stmt::For{ name, start, end, body }
     }
 
     fn print_statement(&mut self) -> Stmt {

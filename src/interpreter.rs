@@ -37,26 +37,38 @@ impl Interpreter {
             Stmt::Print(expr) => print!("{}", self.evaluate_expr(expr).to_string()),
             Stmt::Println(expr) => println!("{}", self.evaluate_expr(expr).to_string()),
 
-            Stmt::Var(token, expr) => {
+            Stmt::Var { name, expr } => {
                 let value = self.evaluate_expr(expr);
-                self.env.insert_value(&token.lexeme, value);
+                self.env.insert_value(&name.lexeme, value);
             }
 
             Stmt::Block(statements) => self.evaluate_block_stmt(statements),
 
-            Stmt::If(first_if, else_ifs, other) => self.evaluate_if_stmt(first_if, else_ifs, other),
-
-            Stmt::While(expr, statement) => {
-                while let Value::True = self.evaluate_expr(expr) {
-                    self.evaluate_stmt(statement);
+            Stmt::If {
+                first_if,
+                else_ifs,
+                final_else,
+            } => self.evaluate_if_stmt(first_if, else_ifs, final_else),
+            Stmt::While { condition, body } => {
+                while let Value::True = self.evaluate_expr(condition) {
+                    self.evaluate_stmt(body);
                 }
             }
 
-            Stmt::For(name, start, end, statement) => {
-                self.evaluate_for_stmt(name, start, end, statement)
-            }
-            Stmt::Function(name, params, body) => {
-                let function = Stmt::Function(name.clone(), params.clone(), body.clone());
+            Stmt::For {
+                name,
+                start,
+                end,
+                body,
+            } => self.evaluate_for_stmt(name, start, end, body),
+
+            Stmt::Function { name, params, body } => {
+                let function = Stmt::Function {
+                    name: name.clone(),
+                    params: params.clone(),
+                    body: body.clone(),
+                };
+
                 let function = Value::Callable(Box::new(Function::new(function)));
                 self.env.insert_value(&name.lexeme, function);
             }
