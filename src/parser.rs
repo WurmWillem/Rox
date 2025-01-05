@@ -1,7 +1,8 @@
 use crate::{
     crash,
     expr::Expr,
-    stmt::{If, Stmt},
+    callable::FunDeclaration,
+    stmt::{ If, Stmt},
     token::{Literal, Token},
     token_type::TokenType,
 };
@@ -74,7 +75,7 @@ impl Parser {
 
         let body = Box::new(self.block_statement());
 
-        Stmt::Function { name, params, body }
+        Stmt::Function( FunDeclaration { name, params, body })
     }
 
     fn statement(&mut self) -> Stmt {

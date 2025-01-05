@@ -1,5 +1,5 @@
 use crate::{
-    callable::{Clock, Function},
+    callable::Clock,
     crash,
     environment::Env,
     expr::Expr,
@@ -62,15 +62,9 @@ impl Interpreter {
                 body,
             } => self.evaluate_for_stmt(name, start, end, body),
 
-            Stmt::Function { name, params, body } => {
-                let function = Stmt::Function {
-                    name: name.clone(),
-                    params: params.clone(),
-                    body: body.clone(),
-                };
-
-                let function = Value::Callable(Box::new(Function::new(function)));
-                self.env.insert_value(&name.lexeme, function);
+            Stmt::Function(funtion) => {
+                let function = Value::Callable(Box::new(funtion.clone()));
+                self.env.insert_value(&funtion.name.lexeme, function);
             }
         }
     }

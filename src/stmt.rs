@@ -1,3 +1,4 @@
+use crate::callable::FunDeclaration;
 use crate::expr::Expr;
 use crate::token::Token;
 
@@ -26,11 +27,7 @@ pub enum Stmt {
         end: Expr,
         body: Box<Stmt>,
     },
-    Function {
-        name: Token,
-        params: Vec<Token>,
-        body: Box<Stmt>,
-    },
+    Function(FunDeclaration),
 }
 
 #[derive(Debug, Clone)]
