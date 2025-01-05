@@ -47,7 +47,6 @@ impl Callable for Clock {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct FunDeclaration {
     pub name: Token,

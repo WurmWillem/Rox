@@ -1,16 +1,8 @@
-proces hey(x) {
-  roep x;
+proces sayHi(first, last) {
+  roep "Hi, " + first + " " + last + "!";
 }
 
-hey(5);
-roep clock;
-
-
-
-
-
-
-
+sayHi("Dear", "Reader");
 
 /*laat now = clock();
 

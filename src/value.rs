@@ -17,7 +17,7 @@ impl Value {
             Value::False => "nietus".to_string(),
             Value::Num(num) => num.to_string(),
             Value::Str(str) => str.to_string(),
-            Value::Callable(callee) => callee.to_string(),
+            Value::Callable(callee) => format!("<fn {}>", callee.to_string()),
         }
     }
 
