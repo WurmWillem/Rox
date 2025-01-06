@@ -79,9 +79,9 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
 
 
-- Create a file called "file.lox" in the same directory as the project and execute the command cargo run without additional arguments. this will give you full access to Rox, statements included.
+- Create a file called "file.lox" in the same directory as the project and execute the command cargo run --release without additional arguments. this will give you full access to Rox, statements included.
   ```
-  cargo run
+  cargo run --release
   ```
   
 - Or execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
