@@ -1,7 +1,7 @@
 use crate::value::Value;
 use colored::Colorize;
 
-pub fn error(line: usize, message: &str) {
+pub fn rox_error(line: usize, message: &str) {
     let l = "[line ".blue();
     let i = "] Error: ".blue();
     let message = message.red();
@@ -18,4 +18,5 @@ pub fn crash(line: usize, message: &str) -> ! {
 pub enum RoxError {
     Return { value: Value },
     ScanError,
+    ParseError,
 }

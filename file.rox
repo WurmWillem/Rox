@@ -1,4 +1,5 @@
-laat x = $#;
+laat = 3;
+laat = 2;
 
 /*
 laat x = 1 + 2;

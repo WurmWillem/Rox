@@ -21,13 +21,19 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scan error detected, aborting.".purple());
+                println!("{}", "Scan error(s) detected, aborting.".purple());
                 return;
             },
         };
 
         let mut parser = Parser::new(tokens);
-        let expr = parser.parse_expr();
+        let expr = match parser.parse_expr() {
+            Ok(expr) => expr,
+            Err(_) => {
+                println!("{}", "Parse error(s) detected, aborting.".purple());
+                return;
+            },
+        };
         if PRINT_PARS_OUTPUT {
             println!("{}", expr.to_string());
         }
@@ -50,7 +56,7 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scan error detected, aborting.".purple());
+                println!("{}", "Scan error(s) detected, aborting.".purple());
                 return;
             },
         };
@@ -63,7 +69,14 @@ impl Rox {
         }
 
         let mut parser = Parser::new(tokens);
-        let statements = parser.parse_statements();
+
+        let statements = match parser.parse_statements() {
+            Ok(statements) => statements,
+            Err(_) => {
+                println!("{}", "Parse error(s) detected, aborting.".purple());
+                return;
+            },
+        };
 
         let mut interpreter = Interpreter::new();
         interpreter.interpret(statements);

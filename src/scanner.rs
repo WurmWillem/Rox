@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::error::{crash, error, RoxError};
+use crate::error::{crash, rox_error, RoxError};
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
 
@@ -154,7 +154,7 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    error(self.line, "Onverwacht karakter.");
+                    rox_error(self.line, "Onverwacht karakter.");
                     self.had_error = true;
                 }
             }

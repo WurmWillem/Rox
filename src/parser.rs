@@ -1,6 +1,6 @@
 use crate::{
     callable::FunDeclaration,
-    error::crash,
+    error::{rox_error, RoxError},
     expr::Expr,
     stmt::{If, Stmt},
     token::{Literal, Token},
@@ -16,19 +16,19 @@ impl Parser {
         Parser { tokens, current: 0 }
     }
 
-    pub fn parse_expr(&mut self) -> Expr {
+    pub fn parse_expr(&mut self) -> Result<Expr, RoxError> {
         self.expression()
     }
 
-    pub fn parse_statements(&mut self) -> Vec<Stmt> {
+    pub fn parse_statements(&mut self) -> Result<Vec<Stmt>, RoxError> {
         let mut statements = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.declaration());
+            statements.push(self.declaration()?);
         }
-        statements
+        Ok(statements)
     }
 
-    fn declaration(&mut self) -> Stmt {
+    fn declaration(&mut self) -> Result<Stmt, RoxError> {
         if self.matches(vec![TokenType::Var]) {
             return self.var_declaration();
         } else if self.matches(vec![TokenType::Fun]) {
@@ -37,48 +37,48 @@ impl Parser {
         self.statement()
     }
 
-    fn var_declaration(&mut self) -> Stmt {
+    fn var_declaration(&mut self) -> Result<Stmt, RoxError> {
         let name = self.consume(
             TokenType::Identifier,
-            "Je moet wel een naam aan de variabele geven",
-        );
+            "Je moet wel een naam aan de variabele geven.",
+        )?;
 
         let mut value = Expr::Lit(Literal::Nil);
         if self.matches(vec![TokenType::Equal]) {
-            value = self.expression();
+            value = self.expression()?;
         }
 
-        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten druiloor");
-        Stmt::Var { name, expr: value }
+        self.consume(TokenType::Semicolon, "Je bent de ';' vergeten.")?;
+        Ok(Stmt::Var { name, expr: value })
     }
 
-    fn fun_declaration(&mut self, kind: &str) -> Stmt {
+    fn fun_declaration(&mut self, kind: &str) -> Result<Stmt, RoxError> {
         let msg = format!("Je moet wel een naam aan de {} geven", kind);
-        let name = self.consume(TokenType::Identifier, &msg);
+        let name = self.consume(TokenType::Identifier, &msg)?;
 
         let msg = format!("Verwachtte '(' na de {} naam.", kind);
-        self.consume(TokenType::LeftParen, &msg);
+        self.consume(TokenType::LeftParen, &msg)?;
 
         let mut params = Vec::new();
         if !self.matches(vec![TokenType::RightParen]) {
-            params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma."));
+            params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma.")?);
 
             while self.matches(vec![TokenType::Comma]) {
-                params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma."))
+                params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma.")?)
             }
         }
 
-        self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.");
+        self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.")?;
 
         let msg = format!("Verwachtte '{{' na de {} naam.", kind);
-        self.consume(TokenType::LeftBrace, &msg);
+        self.consume(TokenType::LeftBrace, &msg)?;
 
-        let body = Box::new(self.block_statement());
+        let body = Box::new(self.block_statement()?);
 
-        Stmt::Function(FunDeclaration { name, params, body })
+        Ok(Stmt::Function(FunDeclaration { name, params, body }))
     }
 
-    fn statement(&mut self) -> Stmt {
+    fn statement(&mut self) -> Result<Stmt, RoxError> {
         if self.matches(vec![TokenType::Print]) {
             return self.print_statement();
         } else if self.matches(vec![TokenType::Println]) {
@@ -95,143 +95,146 @@ impl Parser {
         self.expr_statement()
     }
 
-    fn block_statement(&mut self) -> Stmt {
+    fn block_statement(&mut self) -> Result<Stmt, RoxError> {
         let mut statements = Vec::new();
         while !self.check(TokenType::RightBrace) && !self.is_at_end() {
-            statements.push(self.declaration());
+            statements.push(self.declaration()?);
         }
 
-        self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor");
-        Stmt::Block(statements)
+        self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor")?;
+        Ok(Stmt::Block(statements))
     }
 
-    fn if_statement(&mut self) -> Stmt {
-        let first_if = If::new(self.expression(), self.statement());
+    fn if_statement(&mut self) -> Result<Stmt, RoxError> {
+        let first_if = If::new(self.expression()?, self.statement()?);
 
         let mut else_ifs = Vec::new();
 
         let mut final_else = None;
         while self.matches(vec![TokenType::Else]) {
             if self.matches(vec![TokenType::If]) {
-                let else_if = If::new(self.expression(), self.statement());
+                let else_if = If::new(self.expression()?, self.statement()?);
                 else_ifs.push(else_if);
             } else {
-                final_else = Some(Box::new(self.statement()));
+                final_else = Some(Box::new(self.statement()?));
                 break;
             }
         }
 
-        Stmt::If {
+        Ok(Stmt::If {
             first_if,
             else_ifs,
             final_else,
-        }
+        })
     }
 
-    fn while_statement(&mut self) -> Stmt {
-        let condition = self.expression();
-        let body = Box::new(self.statement());
+    fn while_statement(&mut self) -> Result<Stmt, RoxError> {
+        let condition = self.expression()?;
+        let body = Box::new(self.statement()?);
 
-        Stmt::While { condition, body }
+        Ok(Stmt::While { condition, body })
     }
 
-    fn for_statement(&mut self) -> Stmt {
+    fn for_statement(&mut self) -> Result<Stmt, RoxError> {
         let name = self.consume(
             TokenType::Identifier,
             "Je moet wel een naam aan de variabele geven.",
-        );
-        self.consume(TokenType::From, "Verwachtte 'van'.");
+        )?;
+        self.consume(TokenType::From, "Verwachtte 'van'.")?;
 
-        let start = self.expression();
-        self.consume(TokenType::Until, "Verwachtte 'tot'.");
-        let end = self.expression();
+        let start = self.expression()?;
+        self.consume(TokenType::Until, "Verwachtte 'tot'.")?;
+        let end = self.expression()?;
 
-        let body = Box::new(self.statement());
+        let body = Box::new(self.statement()?);
 
-        Stmt::For {
+        Ok(Stmt::For {
             name,
             start,
             end,
             body,
-        }
+        })
     }
 
-    fn print_statement(&mut self) -> Stmt {
+    fn print_statement(&mut self) -> Result<Stmt, RoxError> {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
-        Stmt::Print(expr)
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
+        Ok(Stmt::Print(expr?))
     }
 
-    fn println_statement(&mut self) -> Stmt {
+    fn println_statement(&mut self) -> Result<Stmt, RoxError> {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
-        Stmt::Println(expr)
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
+        Ok(Stmt::Println(expr?))
     }
 
-    fn expr_statement(&mut self) -> Stmt {
+    fn expr_statement(&mut self) -> Result<Stmt, RoxError> {
         let expr = self.expression();
-        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor");
-        Stmt::Expr(expr)
+        self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
+        Ok(Stmt::Expr(expr?))
     }
 
-    fn expression(&mut self) -> Expr {
+    fn expression(&mut self) -> Result<Expr, RoxError> {
         self.assignment()
     }
 
-    fn assignment(&mut self) -> Expr {
-        let expr = self.or();
+    fn assignment(&mut self) -> Result<Expr, RoxError> {
+        let expr = self.or()?;
 
         if self.matches(vec![TokenType::Equal]) {
             let equals = self.previous();
-            let value = self.assignment();
+            let value = self.assignment()?;
 
             match expr {
-                Expr::Var(name) => return Expr::Assign(name, Box::new(value)),
-                _ => crash(equals.line, "dit kan je niet assignen."),
+                Expr::Var(name) => return Ok(Expr::Assign(name, Box::new(value))),
+                _ => {
+                    rox_error(equals.line, "Dit kan je niet assignen.");
+                    return Err(RoxError::ParseError);
+                }
             }
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn or(&mut self) -> Expr {
-        let left = self.and();
+    fn or(&mut self) -> Result<Expr, RoxError> {
+        let left = self.and()?;
 
         while self.matches(vec![TokenType::Or]) {
             let op = self.previous();
-            let right = self.and();
-            return Expr::Logic(Box::new(left), op, Box::new(right));
+            let right = self.and()?;
+            return Ok(Expr::Logic(Box::new(left), op, Box::new(right)));
         }
 
-        left
+        Ok(left)
     }
 
-    fn and(&mut self) -> Expr {
-        let left = self.equality();
+    fn and(&mut self) -> Result<Expr, RoxError> {
+        let left = self.equality()?;
 
         while self.matches(vec![TokenType::And]) {
             let op = self.previous();
-            let right = self.equality();
-            return Expr::Logic(Box::new(left), op, Box::new(right));
+            let right = self.equality()?;
+            return Ok(Expr::Logic(Box::new(left), op, Box::new(right)));
         }
 
-        left
+        Ok(left)
     }
 
-    fn equality(&mut self) -> Expr {
-        let mut expr = self.comparison();
+    fn equality(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.comparison()?;
 
         while self.matches(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
             let op = self.previous();
-            let right = self.comparison();
+            let right = self.comparison()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn comparison(&mut self) -> Expr {
-        let mut expr = self.term();
+    fn comparison(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.term()?;
 
         while self.matches(vec![
             TokenType::Greater,
@@ -240,124 +243,126 @@ impl Parser {
             TokenType::LessEqual,
         ]) {
             let op = self.previous();
-            let right = self.term();
+            let right = self.term()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn term(&mut self) -> Expr {
-        let mut expr = self.factor();
+    fn term(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.factor()?;
 
         while self.matches(vec![TokenType::Plus, TokenType::Minus]) {
             let op = self.previous();
-            let right = self.factor();
+            let right = self.factor()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn factor(&mut self) -> Expr {
-        let mut expr = self.unary();
+    fn factor(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.unary()?;
 
         while self.matches(vec![TokenType::Star, TokenType::Slash]) {
             let op = self.previous();
-            let right = self.unary();
+            let right = self.unary()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn unary(&mut self) -> Expr {
+    fn unary(&mut self) -> Result<Expr, RoxError> {
         if self.matches(vec![TokenType::Bang, TokenType::Minus]) {
             let op = self.previous();
-            let right = self.power();
-            return Expr::Unary(op, Box::new(right));
+            let right = self.power()?;
+            return Ok(Expr::Unary(op, Box::new(right)));
         }
 
         self.power()
     }
 
-    fn power(&mut self) -> Expr {
-        let mut expr = self.call();
+    fn power(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.call()?;
 
         while self.matches(vec![TokenType::Caret]) {
             let op = self.previous();
-            let right = self.call();
+            let right = self.call()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn call(&mut self) -> Expr {
-        let mut expr = self.primary();
+    fn call(&mut self) -> Result<Expr, RoxError> {
+        let mut expr = self.primary()?;
 
         loop {
             if self.matches(vec![TokenType::LeftParen]) {
-                expr = self.finish_call(expr.clone());
+                expr = self.finish_call(expr.clone())?;
             } else {
                 break;
             }
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn finish_call(&mut self, callee: Expr) -> Expr {
+    fn finish_call(&mut self, callee: Expr) -> Result<Expr, RoxError> {
         let mut arguments = Vec::new();
 
         if !self.check(TokenType::RightParen) {
-            arguments.push(Box::new(self.expression()));
+            arguments.push(Box::new(self.expression()?));
             while self.matches(vec![TokenType::Comma]) {
-                arguments.push(Box::new(self.expression()));
+                arguments.push(Box::new(self.expression()?));
             }
         }
 
-        let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten");
+        let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten")?;
 
-        Expr::Call(Box::new(callee), token, arguments)
+        Ok(Expr::Call(Box::new(callee), token, arguments))
     }
 
-    fn primary(&mut self) -> Expr {
+    fn primary(&mut self) -> Result<Expr, RoxError> {
         if self.matches(vec![TokenType::True]) {
-            return Expr::Lit(Literal::True);
+            return Ok(Expr::Lit(Literal::True));
         } else if self.matches(vec![TokenType::False]) {
-            return Expr::Lit(Literal::False);
+            return Ok(Expr::Lit(Literal::False));
         } else if self.matches(vec![TokenType::Nil]) {
-            return Expr::Lit(Literal::Nil);
+            return Ok(Expr::Lit(Literal::Nil));
         }
 
         if self.matches(vec![TokenType::Identifier]) {
-            return Expr::Var(self.previous());
+            return Ok(Expr::Var(self.previous()));
         }
 
         if self.matches(vec![TokenType::Number, TokenType::String]) {
-            return Expr::Lit(self.previous().literal);
+            return Ok(Expr::Lit(self.previous().literal));
         }
 
         if self.matches(vec![TokenType::LeftParen]) {
-            let expr = self.expression();
+            let expr = self.expression()?;
             self.consume(
                 TokenType::RightParen,
                 "Je bent de ')' vergeten (je mag niet meer op mijn kinderfeestje komen)",
-            );
+            )?;
 
-            return Expr::Grouping(Box::new(expr));
+            return Ok(Expr::Grouping(Box::new(expr)));
         }
 
-        let str = format!("{:?} past hier niet oelewapper.", self.peek().kind);
-        crash(self.peek().line, &str);
+        let msg = format!("{:?} past hier niet.", self.peek().kind);
+        rox_error(self.peek().line, &msg);
+        Err(RoxError::ParseError)
     }
 
-    fn consume(&mut self, token_type: TokenType, msg: &str) -> Token {
+    fn consume(&mut self, token_type: TokenType, msg: &str) -> Result<Token, RoxError> {
         if self.check(token_type) {
-            self.advance()
+            Ok(self.advance())
         } else {
-            crash(self.peek().line, msg);
+            rox_error(self.peek().line, msg);
+            Err(RoxError::ParseError)
         }
     }
 
