@@ -20,21 +20,66 @@ impl Parser {
         self.expression()
     }
 
-    pub fn parse_statements(&mut self) -> Result<Vec<Stmt>, RoxError> {
+    pub fn parse_statements(&mut self) -> Option<Vec<Stmt>> {
+        let mut parse_error_found = false;
         let mut statements = Vec::new();
+
         while !self.is_at_end() {
-            statements.push(self.declaration()?);
+            match self.declaration() {
+                Some(declaration) => statements.push(declaration),
+                None => parse_error_found = true,
+            }
         }
-        Ok(statements)
+
+        if parse_error_found {
+            None
+        } else {
+            Some(statements)
+        }
     }
 
-    fn declaration(&mut self) -> Result<Stmt, RoxError> {
-        if self.matches(vec![TokenType::Var]) {
-            return self.var_declaration();
-        } else if self.matches(vec![TokenType::Fun]) {
-            return self.fun_declaration("functie");
+    fn synchronize(&mut self) {
+        self.advance();
+        while !self.is_at_end() {
+            if self.previous().kind == TokenType::Semicolon {
+                return;
+            }
+
+            match self.peek().kind {
+                TokenType::Class
+                | TokenType::Fun
+                | TokenType::Var
+                | TokenType::For
+                | TokenType::If
+                | TokenType::While
+                | TokenType::Print
+                | TokenType::Println
+                | TokenType::Return => return,
+                _ => (),
+            }
+
+            self.advance();
         }
-        self.statement()
+    }
+
+    fn declaration(&mut self) -> Option<Stmt> {
+        if self.matches(vec![TokenType::Var]) {
+            match self.var_declaration() {
+                Ok(stmt) => return Some(stmt),
+                Err(_) => self.synchronize(),
+            }
+        } else if self.matches(vec![TokenType::Fun]) {
+            match self.fun_declaration("functie") {
+                Ok(stmt) => return Some(stmt),
+                Err(_) => self.synchronize(),
+            }
+        } else {
+            match self.statement() {
+                Ok(stmt) => return Some(stmt),
+                Err(_) => self.synchronize(),
+            }
+        }
+        None
     }
 
     fn var_declaration(&mut self) -> Result<Stmt, RoxError> {
@@ -98,7 +143,9 @@ impl Parser {
     fn block_statement(&mut self) -> Result<Stmt, RoxError> {
         let mut statements = Vec::new();
         while !self.check(TokenType::RightBrace) && !self.is_at_end() {
-            statements.push(self.declaration()?);
+            if let Some(declaration) = self.declaration()  {
+                statements.push(declaration);
+            }
         }
 
         self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor")?;

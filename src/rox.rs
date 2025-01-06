@@ -30,7 +30,7 @@ impl Rox {
         let expr = match parser.parse_expr() {
             Ok(expr) => expr,
             Err(_) => {
-                println!("{}", "Parse error(s) detected, aborting.".purple());
+                println!("{}", "Parsing error(s) detected, aborting.".purple());
                 return;
             },
         };
@@ -71,9 +71,9 @@ impl Rox {
         let mut parser = Parser::new(tokens);
 
         let statements = match parser.parse_statements() {
-            Ok(statements) => statements,
-            Err(_) => {
-                println!("{}", "Parse error(s) detected, aborting.".purple());
+            Some(statements) => statements,
+            None => {
+                println!("{}", "Parsing error(s) detected, aborting.".purple());
                 return;
             },
         };
