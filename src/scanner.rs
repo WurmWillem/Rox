@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::crash;
+use crate::error::crash;
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
 

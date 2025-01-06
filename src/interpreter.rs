@@ -1,7 +1,7 @@
 use crate::{
     callable::Clock,
-    crash,
     environment::Env,
+    error::crash,
     expr::Expr,
     stmt::{If, Stmt},
     token::Token,
@@ -49,6 +49,7 @@ impl Interpreter {
                 else_ifs,
                 final_else,
             } => self.evaluate_if_stmt(first_if, else_ifs, final_else),
+
             Stmt::While { condition, body } => {
                 while let Value::True = self.evaluate_expr(condition) {
                     self.evaluate_stmt(body);
@@ -66,6 +67,10 @@ impl Interpreter {
                 let function = Value::Callable(Box::new(funtion.clone()));
                 self.env.insert_value(&funtion.name.lexeme, function);
             }
+            Stmt::Return {
+                keyword: _,
+                expr: _,
+            } => todo!(),
         }
     }
 
@@ -112,7 +117,7 @@ impl Interpreter {
             while current < end {
                 self.evaluate_stmt(statement);
 
-                current += 1.0;
+                current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     crash(name.line, &msg)
                 }

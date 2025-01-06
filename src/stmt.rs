@@ -28,6 +28,10 @@ pub enum Stmt {
         body: Box<Stmt>,
     },
     Function(FunDeclaration),
+    Return {
+        keyword: Token,
+        expr: Expr,
+    },
 }
 
 #[derive(Debug, Clone)]

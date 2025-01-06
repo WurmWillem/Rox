@@ -1,10 +1,10 @@
 use std::env;
 
-use colored::Colorize;
 use rox::Rox;
 
 mod callable;
 mod environment;
+mod error;
 mod expr;
 mod interpreter;
 mod parser;
@@ -19,7 +19,7 @@ fn main() {
     let mut lox = Rox::new();
 
     let arguments: Vec<String> = env::args().collect();
-    env::set_var("RUST_BACKTRACE", "1");
+    //env::set_var("RUST_BACKTRACE", "1");
 
     if arguments.len() == 1 {
         // run lox code from a file
@@ -35,12 +35,4 @@ fn main() {
         println!("{}", input);
         lox.run_prompt(input);
     }
-}
-
-pub fn crash(line: usize, message: &str) -> ! {
-    let l = "[line ".blue();
-    let i = "] Error: ".blue();
-    let message = message.red();
-    panic!("{}{}{}{}", l, line, i, message);
-    //panic!("[line {}] Error: {}", line, message);
 }
