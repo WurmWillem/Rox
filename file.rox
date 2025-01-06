@@ -1,25 +1,4 @@
-laat t1 = clock();
-laat i = 0;
-laat current = 1;
-terwijl i < 10^7 {
-   current = current * 1.00001;
-   i = i + 1;
-}
-roep current;
-
-laat t2 = clock();
-roep t2 - t1;
-
-
-laat t1 = clock();
-laat current = 1;
-voor i van 0 tot 10^7 {
-   current = current * 1.00001;
-}
-roep current;
-
-laat t2 = clock();
-roep t2 - t1;
+laat x = $#;
 
 /*
 laat x = 1 + 2;

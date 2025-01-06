@@ -19,7 +19,7 @@ fn main() {
     let mut lox = Rox::new();
 
     let arguments: Vec<String> = env::args().collect();
-    //env::set_var("RUST_BACKTRACE", "1");
+    env::set_var("RUST_BACKTRACE", "1");
 
     if arguments.len() == 1 {
         // run lox code from a file

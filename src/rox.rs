@@ -1,6 +1,7 @@
 use std::fs;
 
-use crate::{interpreter::Interpreter, parser::Parser, scanner::Scanner};
+use colored::Colorize;
+use crate::{ interpreter::Interpreter, parser::Parser, scanner::Scanner};
 
 const PRINT_SCAN_OUTPUT: bool = false;
 const PRINT_PARS_OUTPUT: bool = false;
@@ -17,7 +18,13 @@ impl Rox {
 
     pub fn run_prompt(&mut self, source: String) {
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = match scanner.scan_tokens() {
+            Ok(tokens) => tokens,
+            Err(_) => {
+                println!("{}", "Scan error detected, aborting.".purple());
+                return;
+            },
+        };
 
         let mut parser = Parser::new(tokens);
         let expr = parser.parse_expr();
@@ -40,7 +47,14 @@ impl Rox {
     fn run(&mut self, source: String) {
         let mut scanner = Scanner::new(source);
 
-        let tokens = scanner.scan_tokens();
+        let tokens = match scanner.scan_tokens() {
+            Ok(tokens) => tokens,
+            Err(_) => {
+                println!("{}", "Scan error detected, aborting.".purple());
+                return;
+            },
+        };
+
         if PRINT_SCAN_OUTPUT {
             for token in &tokens {
                 print!("{}_", token.to_string());

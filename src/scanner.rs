@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::error::crash;
+use crate::error::{crash, error, RoxError};
 use crate::token::{Literal, Token};
 use crate::token_type::TokenType;
 
@@ -12,6 +12,7 @@ pub struct Scanner {
     start: usize,
     current: usize,
     line: usize,
+    had_error: bool,
 }
 
 impl Scanner {
@@ -38,10 +39,11 @@ impl Scanner {
             start: 0,
             current: 0,
             line: 1,
+            had_error: false,
         }
     }
 
-    pub fn scan_tokens(&mut self) -> Vec<Token> {
+    pub fn scan_tokens(&mut self) -> Result<Vec<Token>, RoxError> {
         while !self.at_end_input() {
             self.start = self.current;
             self.scan_token();
@@ -54,7 +56,11 @@ impl Scanner {
             self.line,
         ));
 
-        self.tokens.clone()
+        if self.had_error {
+            Err(RoxError::ScanError)
+        } else {
+            Ok(self.tokens.clone())
+        }
     }
 
     fn at_end_input(&self) -> bool {
@@ -118,7 +124,7 @@ impl Scanner {
                     self.current += 1;
                 }
                 if self.at_end_input() {
-                    crash(self.line, "ongetermineerde reeks, appelflap");
+                    crash(self.line, "Ongetermineerde reeks.");
                 }
 
                 self.current += 1;
@@ -148,7 +154,8 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    crash(self.line, "Onverwacht karakter, dat kan beter appelflap");
+                    error(self.line, "Onverwacht karakter.");
+                    self.had_error = true;
                 }
             }
         }

@@ -67,6 +67,7 @@ impl Interpreter {
                 let function = Value::Callable(Box::new(funtion.clone()));
                 self.env.insert_value(&funtion.name.lexeme, function);
             }
+
             Stmt::Return {
                 keyword: _,
                 expr: _,
