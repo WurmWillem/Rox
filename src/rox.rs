@@ -1,7 +1,12 @@
 use std::fs;
 
+use crate::{
+    error::{crash, rox_error, RuntimeErr},
+    interpreter::Interpreter,
+    parser::Parser,
+    scanner::Scanner,
+};
 use colored::Colorize;
-use crate::{ interpreter::Interpreter, parser::Parser, scanner::Scanner};
 
 const PRINT_SCAN_OUTPUT: bool = false;
 const PRINT_PARS_OUTPUT: bool = false;
@@ -21,25 +26,37 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scanfout(en) gedetecteerd, programma wordt gestopt.".purple());
+                println!(
+                    "{}",
+                    "Scanfout(en) gedetecteerd, programma wordt gestopt.".purple()
+                );
                 return;
-            },
+            }
         };
 
         let mut parser = Parser::new(tokens);
         let expr = match parser.parse_expr() {
             Ok(expr) => expr,
             Err(_) => {
-                println!("{}", "Parsingfout(en) gedetecteerd,  programma wordt gestopt.".purple());
+                println!(
+                    "{}",
+                    "Parsingfout(en) gedetecteerd,  programma wordt gestopt.".purple()
+                );
                 return;
-            },
+            }
         };
         if PRINT_PARS_OUTPUT {
             println!("{}", expr.to_string());
         }
 
         let mut interpreter = Interpreter::new();
-        let value = interpreter.evaluate_expr(&expr);
+        let value = match interpreter.evaluate_expr(&expr) {
+            Ok(value) => value,
+            Err(err) => {
+                let RuntimeErr::Err(line, msg) = err;
+                crash(line, &msg);
+            }
+        };
 
         println!("{}", value.to_string());
     }
@@ -56,9 +73,12 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scan error(s) detected, programma wordt gestopt.".purple());
+                println!(
+                    "{}",
+                    "Scan error(s) detected, programma wordt gestopt.".purple()
+                );
                 return;
-            },
+            }
         };
 
         if PRINT_SCAN_OUTPUT {
@@ -73,9 +93,12 @@ impl Rox {
         let statements = match parser.parse_statements() {
             Some(statements) => statements,
             None => {
-                println!("{}", "Parsingfout(en) gedetecteerd, programma wordt gestopt.".purple());
+                println!(
+                    "{}",
+                    "Parsingfout(en) gedetecteerd, programma wordt gestopt.".purple()
+                );
                 return;
-            },
+            }
         };
 
         let mut interpreter = Interpreter::new();

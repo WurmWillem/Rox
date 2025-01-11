@@ -1,7 +1,7 @@
 use crate::{
     callable::Clock,
     environment::Env,
-    error::crash,
+    error::{crash, RuntimeErr},
     expr::Expr,
     stmt::{If, Stmt},
     token::Token,
@@ -22,23 +22,28 @@ impl Interpreter {
         Self { env }
     }
 
-    pub fn interpret(&mut self, statements: Vec<Stmt>) {
+    pub fn interpret(&mut self, statements: Vec<Stmt>) -> bool {
+        let mut error_found = false;
         for statement in statements {
-            self.evaluate_stmt(&statement);
+            match self.evaluate_stmt(&statement) {
+                Ok(_) => (),
+                Err(_) => error_found = true,
+            }
         }
+        error_found
     }
 
-    pub fn evaluate_stmt(&mut self, stmt: &Stmt) {
+    pub fn evaluate_stmt(&mut self, stmt: &Stmt) -> Result<(), RuntimeErr> {
         match stmt {
             Stmt::Expr(expr) => {
-                self.evaluate_expr(expr);
+                self.evaluate_expr(expr)?;
             }
 
-            Stmt::Print(expr) => print!("{}", self.evaluate_expr(expr).to_string()),
-            Stmt::Println(expr) => println!("{}", self.evaluate_expr(expr).to_string()),
+            Stmt::Print(expr) => print!("{}", (self.evaluate_expr(expr)?).to_string()),
+            Stmt::Println(expr) => println!("{}", (self.evaluate_expr(expr)?).to_string()),
 
             Stmt::Var { name, expr } => {
-                let value = self.evaluate_expr(expr);
+                let value = self.evaluate_expr(expr)?;
                 self.env.insert_value(&name.lexeme, value);
             }
 
@@ -48,10 +53,10 @@ impl Interpreter {
                 first_if,
                 else_ifs,
                 final_else,
-            } => self.evaluate_if_stmt(first_if, else_ifs, final_else),
+            } => self.evaluate_if_stmt(first_if, else_ifs, final_else)?,
 
             Stmt::While { condition, body } => {
-                while let Value::True = self.evaluate_expr(condition) {
+                while let Value::True = self.evaluate_expr(condition)? {
                     self.evaluate_stmt(body);
                 }
             }
@@ -61,7 +66,7 @@ impl Interpreter {
                 start,
                 end,
                 body,
-            } => self.evaluate_for_stmt(name, start, end, body),
+            } => self.evaluate_for_stmt(name, start, end, body)?,
 
             Stmt::Function(funtion) => {
                 let function = Value::Callable(Box::new(funtion.clone()));
@@ -73,6 +78,7 @@ impl Interpreter {
                 expr: _,
             } => todo!(),
         }
+        Ok(())
     }
 
     fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) {
@@ -83,15 +89,20 @@ impl Interpreter {
         self.env.kill_youngest_child();
     }
 
-    fn evaluate_if_stmt(&mut self, first_if: &If, else_ifs: &Vec<If>, other: &Option<Box<Stmt>>) {
-        if let Value::True = self.evaluate_expr(&first_if.should_execute) {
+    fn evaluate_if_stmt(
+        &mut self,
+        first_if: &If,
+        else_ifs: &Vec<If>,
+        other: &Option<Box<Stmt>>,
+    ) -> Result<(), RuntimeErr> {
+        if let Value::True = self.evaluate_expr(&first_if.should_execute)? {
             // execute the first if
-            self.evaluate_stmt(&first_if.statement);
+            self.evaluate_stmt(&first_if.statement)
         } else {
             // check for other else_ifs
             let mut else_if_executed = false;
             for else_if in else_ifs {
-                if let Value::True = self.evaluate_expr(&else_if.should_execute) {
+                if let Value::True = self.evaluate_expr(&else_if.should_execute)? {
                     self.evaluate_stmt(&else_if.statement);
                     else_if_executed = true;
                     break;
@@ -101,15 +112,22 @@ impl Interpreter {
             // execute if there is an else and no else_ifs were executed
             if !else_if_executed {
                 if let Some(other) = other {
-                    self.evaluate_stmt(other);
+                    self.evaluate_stmt(other)?
                 }
             }
+            Ok(())
         }
     }
 
-    fn evaluate_for_stmt(&mut self, name: &Token, start: &Expr, end: &Expr, statement: &Stmt) {
-        let start_value = self.evaluate_expr(start);
-        let end_value = self.evaluate_expr(end);
+    fn evaluate_for_stmt(
+        &mut self,
+        name: &Token,
+        start: &Expr,
+        end: &Expr,
+        statement: &Stmt,
+    ) -> Result<(), RuntimeErr> {
+        let start_value = self.evaluate_expr(start)?;
+        let end_value = self.evaluate_expr(end)?;
 
         if let (Value::Num(mut current), Value::Num(end)) = (start_value, end_value) {
             self.env.create_new_child();
@@ -120,7 +138,7 @@ impl Interpreter {
 
                 current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
-                    crash(name.line, &msg)
+                    return Err(RuntimeErr::Err(name.line, msg));
                 }
             }
 
@@ -129,18 +147,19 @@ impl Interpreter {
 
                 current -= 1.0;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
-                    crash(name.line, &msg)
+                    return Err(RuntimeErr::Err(name.line, msg));
                 }
             }
             self.env.kill_youngest_child();
+            Ok(())
         } else {
             panic!("Unreachable.");
         }
     }
 
-    pub fn evaluate_expr(&mut self, expr: &Expr) -> Value {
+    pub fn evaluate_expr(&mut self, expr: &Expr) -> Result<Value, RuntimeErr> {
         match expr {
-            Expr::Lit(lit) => Value::from_lit(lit),
+            Expr::Lit(lit) => Ok(Value::from_lit(lit)),
             Expr::Grouping(expr) => self.evaluate_expr(expr),
             Expr::Unary(token, expr) => self.evaluate_unary_expr(token, expr),
             Expr::Binary(left, op, right) => self.evaluate_binary_expr(left, op, right),
@@ -158,37 +177,46 @@ impl Interpreter {
         callee: &Expr,
         right_paren: &Token,
         args: &Vec<Box<Expr>>,
-    ) -> Value {
-        let callee = self.evaluate_expr(callee);
-        let arguments: Vec<Value> = args.iter().map(|arg| self.evaluate_expr(arg)).collect();
+    ) -> Result<Value, RuntimeErr> {
+        let callee = self.evaluate_expr(callee)?;
+
+        let mut arguments = Vec::new();
+        for arg in args {
+            arguments.push(self.evaluate_expr(arg)?);
+        }
 
         if let Value::Callable(callee) = callee {
             if callee.arity() != arguments.len() {
                 let msg = format!(
-                    "Verwachtte {} argumenten maar kreeg er {}",
+                    "Verwachtte {} argumenten maar kreeg er {}.",
                     callee.arity(),
                     arguments.len(),
                 );
-                crash(right_paren.line, &msg);
+                RuntimeErr::Err(right_paren.line, msg);
             }
-            callee.call(arguments, self)
+            Ok(callee.call(arguments, self))
         } else {
-            crash(right_paren.line, "Je kan alleen functies en klassen bellen");
+            let msg = "Je kan alleen functies en klassen bellen.".to_string();
+            Err(RuntimeErr::Err(right_paren.line, msg))
         }
     }
-    fn evaluate_unary_expr(&mut self, token: &Token, expr: &Box<Expr>) -> Value {
-        let right = self.evaluate_expr(expr);
+    fn evaluate_unary_expr(
+        &mut self,
+        token: &Token,
+        expr: &Box<Expr>,
+    ) -> Result<Value, RuntimeErr> {
+        let right = self.evaluate_expr(expr)?;
 
         match token.kind {
             TokenType::Minus => match right {
-                Value::Num(num) => Value::Num(-num),
+                Value::Num(num) => Ok(Value::Num(-num)),
                 _ => crash(
                     token.line,
                     "Min kan alleen worden gebruikt voor nummers, kaaskop",
                 ),
             },
             TokenType::Bang => match right.is_true() {
-                Some(bool) => Value::from_bool(!bool),
+                Some(bool) => Ok(Value::from_bool(!bool)),
                 None => crash(
                     token.line,
                     "Uitroepteken kan alleen worden gebruikt op waarheidswaardes, kaaskop",
@@ -198,16 +226,22 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_binary_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Box<Expr>) -> Value {
-        let left = self.evaluate_expr(left);
-        let right = self.evaluate_expr(right);
+    fn evaluate_binary_expr(
+        &mut self,
+        left: &Box<Expr>,
+        op: &Token,
+        right: &Box<Expr>,
+    ) -> Result<Value, RuntimeErr> {
+        let left = self.evaluate_expr(left)?;
+        let right = self.evaluate_expr(right)?;
 
         macro_rules! apply_arith_to_nums {
             ($type: ident, $op: tt) => {
                 if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
-                    Value::Num(num1 $op num2)
+                    Ok(Value::Num(num1 $op num2))
                 } else {
-                    crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt op nummers, kaaskop"))
+                    let msg = concat!(stringify!($op), " kan alleen worden gebruikt op nummers.");
+                    Err(RuntimeErr::Err(op.line, msg.to_string()))
                 }
             };
         }
@@ -215,37 +249,42 @@ impl Interpreter {
         macro_rules! apply_logic_to_nums {
             ($type: ident, $op: tt) => {
                 if let (Value::Num(num1), Value::Num(num2)) = (left, right) {
-                    Value::from_bool(num1 $op num2)
+                    Ok(Value::from_bool(num1 $op num2))
                 } else {
-                    crash(op.line, concat!(stringify!($op), " kan alleen worden gebruikt op nummers, kaaskop"));
+                    let msg = concat!(stringify!($op), " kan alleen worden gebruikt op nummers.");
+                    Err(RuntimeErr::Err(op.line, msg.to_string()))
                 }
             };
         }
 
         match op.kind {
             TokenType::Plus => match (left, right) {
-                (Value::Num(num), Value::Str(str)) => return Value::Str(format!("{}{}", num, str)),
-                (Value::Str(str), Value::Num(num)) => return Value::Str(format!("{}{}", str, num)),
-                (Value::Num(num1), Value::Num(num2)) => return Value::Num(num1 + num2),
+                (Value::Num(num), Value::Str(str)) => {
+                    return Ok(Value::Str(format!("{}{}", num, str)))
+                }
+                (Value::Str(str), Value::Num(num)) => {
+                    return Ok(Value::Str(format!("{}{}", str, num)))
+                }
+                (Value::Num(num1), Value::Num(num2)) => return Ok(Value::Num(num1 + num2)),
                 (Value::Str(str1), Value::Str(str2)) => {
-                    return Value::Str(format!("{}{}", str1, str2))
+                    return Ok(Value::Str(format!("{}{}", str1, str2)))
                 }
 
-                _ => crash(
+                _ => Err(RuntimeErr::Err(
                     op.line,
-                    "Plus kan alleen worden gebruikt op nummers en strings, kaaskop.",
-                ),
+                    "'+' kan alleen worden gebruikt op nummers en strings.".to_string(),
+                )),
             },
             TokenType::Minus => apply_arith_to_nums!(Minus, -),
             TokenType::Star => apply_arith_to_nums!(Star, *),
             TokenType::Slash => apply_arith_to_nums!(Slash, /),
 
             TokenType::Caret => match (left, right) {
-                (Value::Num(num1), Value::Num(num2)) => return Value::Num(num1.powf(num2)),
-                _ => crash(
+                (Value::Num(num1), Value::Num(num2)) => return Ok(Value::Num(num1.powf(num2))),
+                _ => Err(RuntimeErr::Err(
                     op.line,
-                    "Caret kan alleen worden gebruikt op nummers, kaaskop.",
-                ),
+                    "'^' kan alleen worden gebruikt op nummers.".to_string(),
+                )),
             },
 
             TokenType::Greater => apply_logic_to_nums!(Greater, >),
@@ -254,22 +293,27 @@ impl Interpreter {
             TokenType::LessEqual => apply_logic_to_nums!(LessEqaul, <=),
             TokenType::Equal => apply_logic_to_nums!(Equal, ==),
 
-            TokenType::EqualEqual => Value::from_bool(Value::is_equal(&left, &right)),
-            TokenType::BangEqual => Value::from_bool(!Value::is_equal(&left, &right)),
+            TokenType::EqualEqual => Ok(Value::from_bool(Value::is_equal(&left, &right))),
+            TokenType::BangEqual => Ok(Value::from_bool(!Value::is_equal(&left, &right))),
             _ => panic!("Unreachable."),
         }
     }
 
-    fn evaluate_logic_expr(&mut self, left: &Box<Expr>, op: &Token, right: &Expr) -> Value {
+    fn evaluate_logic_expr(
+        &mut self,
+        left: &Box<Expr>,
+        op: &Token,
+        right: &Expr,
+    ) -> Result<Value, RuntimeErr> {
         match op.kind {
             TokenType::And => {
-                let left = self.evaluate_expr(left).is_true();
+                let left = self.evaluate_expr(left)?.is_true();
 
                 if let Some(left) = left {
-                    let right = self.evaluate_expr(right).is_true();
+                    let right = self.evaluate_expr(right)?.is_true();
 
                     if let Some(right) = right {
-                        return Value::from_bool(left && right);
+                        return Ok(Value::from_bool(left && right));
                     } else {
                         crash(
                             op.line,
@@ -285,10 +329,10 @@ impl Interpreter {
             }
 
             TokenType::Or => {
-                match self.evaluate_expr(left).is_true() {
+                match self.evaluate_expr(left)?.is_true() {
                     Some(left) => {
                         if left {
-                            return Value::True;
+                            return Ok(Value::True);
                         }
                     }
                     None => crash(
@@ -297,8 +341,8 @@ impl Interpreter {
                     ),
                 }
 
-                match self.evaluate_expr(right).is_true() {
-                    Some(right) => Value::from_bool(right),
+                match self.evaluate_expr(right)?.is_true() {
+                    Some(right) => Ok(Value::from_bool(right)),
                     None => crash(
                         op.line,
                         "'of' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
@@ -309,21 +353,21 @@ impl Interpreter {
         }
     }
 
-    fn evaluate_var_expr(&mut self, token: &Token) -> Value {
+    fn evaluate_var_expr(&mut self, token: &Token) -> Result<Value, RuntimeErr> {
         match self.env.get_value(&token) {
-            Some(value) => value,
-            None => crash(
+            Some(value) => Ok(value),
+            None => Err(RuntimeErr::Err(
                 token.line,
-                &format!("'{}' is een onbekende variabele.", token.lexeme),
-            ),
+                format!("'{}' is een onbekende variabele.", token.lexeme),
+            )),
         }
     }
 
-    fn evaluate_assign_expr(&mut self, name: &Token, expr: &Expr) -> Value {
-        let new_value = self.evaluate_expr(expr);
+    fn evaluate_assign_expr(&mut self, name: &Token, expr: &Expr) -> Result<Value, RuntimeErr> {
+        let new_value = self.evaluate_expr(expr)?;
         if let Err(msg) = self.env.replace_value(name, &new_value) {
-            crash(name.line, &msg)
+            return Err(RuntimeErr::Err(name.line, msg));
         }
-        new_value
+        Ok(new_value)
     }
 }
