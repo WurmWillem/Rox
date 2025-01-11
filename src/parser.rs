@@ -27,7 +27,11 @@ impl Parser {
         while !self.is_at_end() {
             match self.declaration() {
                 Ok(declaration) => statements.push(declaration),
-                Err(_) => {
+                Err(e) => {
+                    match e {
+                        RoxError::ParseError { line, msg } => rox_error(line, &msg),
+                        _ => panic!("Unreachable."),
+                    }
                     parse_error_found = true;
                 }
             }
@@ -255,8 +259,11 @@ impl Parser {
             match expr {
                 Expr::Var(name) => return Ok(Expr::Assign(name, Box::new(value))),
                 _ => {
-                    rox_error(equals.line, "Dit kan je niet assignen.");
-                    return Err(RoxError::ParseError);
+                    let err = RoxError::ParseError {
+                        line: equals.line,
+                        msg: "Dit kan je niet assignen.".to_string(),
+                    };
+                    return Err(err);
                 }
             }
         }
@@ -422,16 +429,20 @@ impl Parser {
             "Verwachtte een expressie. {:?} past hier niet.",
             self.peek().kind
         );
-        rox_error(self.peek().line, &msg);
-        Err(RoxError::ParseError)
+        Err(RoxError::ParseError {
+            line: self.peek().line,
+            msg,
+        })
     }
 
     fn consume(&mut self, token_type: TokenType, msg: &str) -> Result<Token, RoxError> {
         if self.check(token_type) {
             Ok(self.advance())
         } else {
-            rox_error(self.peek().line, msg);
-            Err(RoxError::ParseError)
+            Err(RoxError::ParseError {
+                line: self.peek().line,
+                msg: msg.to_string(),
+            })
         }
     }
 

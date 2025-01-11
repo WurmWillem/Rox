@@ -19,5 +19,5 @@ pub fn crash(line: usize, message: &str) -> ! {
 pub enum RoxError {
     Return { value: Value },
     ScanError,
-    ParseError,
+    ParseError {line: usize, msg: String},
 }
