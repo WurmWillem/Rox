@@ -15,6 +15,7 @@ pub fn crash(line: usize, message: &str) -> ! {
     panic!("{}{}{}{}", l, line, i, message);
 }
 
+#[derive(Debug, Clone)]
 pub enum RoxError {
     Return { value: Value },
     ScanError,

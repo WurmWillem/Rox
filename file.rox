@@ -1,14 +1,10 @@
-voor i van 0 tot 10 {
-    roep i;
-    laat i = 3;
-}
+laat x = ;
+laat y = ;
 
-laat i = 0;
-terwijl i < 10 {
-  roep i;
-  i = i + 1;
-  laat i = 3;
+proces p(x) {
+  geef x;
 }
+//p(5);
 
 /*
 laat x = 1 + 2;

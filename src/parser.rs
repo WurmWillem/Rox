@@ -26,8 +26,10 @@ impl Parser {
 
         while !self.is_at_end() {
             match self.declaration() {
-                Some(declaration) => statements.push(declaration),
-                None => parse_error_found = true,
+                Ok(declaration) => statements.push(declaration),
+                Err(_) => {
+                    parse_error_found = true;
+                }
             }
         }
 
@@ -62,24 +64,33 @@ impl Parser {
         }
     }
 
-    fn declaration(&mut self) -> Option<Stmt> {
+    fn declaration(&mut self) -> Result<Stmt, RoxError> {
         if self.matches(vec![TokenType::Var]) {
             match self.var_declaration() {
-                Ok(stmt) => return Some(stmt),
-                Err(_) => self.synchronize(),
+                Ok(stmt) => return Ok(stmt),
+                Err(e) => {
+                    self.synchronize();
+
+                    return Err(e);
+                }
             }
         } else if self.matches(vec![TokenType::Fun]) {
             match self.fun_declaration("functie") {
-                Ok(stmt) => return Some(stmt),
-                Err(_) => self.synchronize(),
+                Ok(stmt) => return Ok(stmt),
+                Err(e) => {
+                    self.synchronize();
+                    return Err(e);
+                }
             }
         } else {
             match self.statement() {
-                Ok(stmt) => return Some(stmt),
-                Err(_) => self.synchronize(),
+                Ok(stmt) => return Ok(stmt),
+                Err(e) => {
+                    self.synchronize();
+                    return Err(e);
+                }
             }
         }
-        None
     }
 
     fn var_declaration(&mut self) -> Result<Stmt, RoxError> {
@@ -136,16 +147,26 @@ impl Parser {
             return self.while_statement();
         } else if self.matches(vec![TokenType::For]) {
             return self.for_statement();
+        } else if self.matches(vec![TokenType::Return]) {
+            return self.return_statement();
         }
         self.expr_statement()
+    }
+
+    fn return_statement(&mut self) -> Result<Stmt, RoxError> {
+        //let value = Expr::Lit(Literal::Nil);
+        let expr = self.expression()?;
+        let keyword = self.consume(TokenType::Semicolon, "verwachtte ';' na geef statement.")?;
+        Ok(Stmt::Return {
+            keyword,
+            expr,
+        })
     }
 
     fn block_statement(&mut self) -> Result<Stmt, RoxError> {
         let mut statements = Vec::new();
         while !self.check(TokenType::RightBrace) && !self.is_at_end() {
-            if let Some(declaration) = self.declaration()  {
-                statements.push(declaration);
-            }
+            statements.push(self.declaration()?);
         }
 
         self.consume(TokenType::RightBrace, "je bent een '}' vergeten druiloor")?;
@@ -204,21 +225,21 @@ impl Parser {
     }
 
     fn print_statement(&mut self) -> Result<Stmt, RoxError> {
-        let expr = self.expression();
+        let expr = self.expression()?;
         self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
-        Ok(Stmt::Print(expr?))
+        Ok(Stmt::Print(expr))
     }
 
     fn println_statement(&mut self) -> Result<Stmt, RoxError> {
-        let expr = self.expression();
+        let expr = self.expression()?;
         self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
-        Ok(Stmt::Println(expr?))
+        Ok(Stmt::Println(expr))
     }
 
     fn expr_statement(&mut self) -> Result<Stmt, RoxError> {
-        let expr = self.expression();
+        let expr = self.expression()?;
         self.consume(TokenType::Semicolon, "Je bent een ';' vergeten druiloor")?;
-        Ok(Stmt::Expr(expr?))
+        Ok(Stmt::Expr(expr))
     }
 
     fn expression(&mut self) -> Result<Expr, RoxError> {
@@ -356,7 +377,6 @@ impl Parser {
 
         Ok(expr)
     }
-
     fn finish_call(&mut self, callee: Expr) -> Result<Expr, RoxError> {
         let mut arguments = Vec::new();
 
@@ -399,7 +419,10 @@ impl Parser {
             return Ok(Expr::Grouping(Box::new(expr)));
         }
 
-        let msg = format!("{:?} past hier niet.", self.peek().kind);
+        let msg = format!(
+            "Verwachtte een expressie. {:?} past hier niet.",
+            self.peek().kind
+        );
         rox_error(self.peek().line, &msg);
         Err(RoxError::ParseError)
     }
