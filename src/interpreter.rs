@@ -1,7 +1,7 @@
 use crate::{
     callable::Clock,
     environment::Env,
-    error::{crash, RuntimeErr},
+    error::{rox_error, RuntimeErr},
     expr::Expr,
     stmt::{If, Stmt},
     token::Token,
@@ -24,10 +24,13 @@ impl Interpreter {
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) -> bool {
         let mut error_found = false;
+
         for statement in statements {
-            match self.evaluate_stmt(&statement) {
-                Ok(_) => (),
-                Err(_) => error_found = true,
+            if let Err(e) = self.evaluate_stmt(&statement) {
+                error_found = true;
+
+                let RuntimeErr::Err(line, msg) = e;
+                rox_error(line, &msg);
             }
         }
         error_found
@@ -47,7 +50,7 @@ impl Interpreter {
                 self.env.insert_value(&name.lexeme, value);
             }
 
-            Stmt::Block(statements) => self.evaluate_block_stmt(statements),
+            Stmt::Block(statements) => self.evaluate_block_stmt(statements)?,
 
             Stmt::If {
                 first_if,
@@ -57,7 +60,7 @@ impl Interpreter {
 
             Stmt::While { condition, body } => {
                 while let Value::True = self.evaluate_expr(condition)? {
-                    self.evaluate_stmt(body);
+                    self.evaluate_stmt(body)?;
                 }
             }
 
@@ -81,12 +84,13 @@ impl Interpreter {
         Ok(())
     }
 
-    fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) {
+    fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) -> Result<(), RuntimeErr> {
         self.env.create_new_child();
         for stmt in statements {
-            self.evaluate_stmt(stmt);
+            self.evaluate_stmt(stmt)?;
         }
         self.env.kill_youngest_child();
+        Ok(())
     }
 
     fn evaluate_if_stmt(
@@ -103,7 +107,7 @@ impl Interpreter {
             let mut else_if_executed = false;
             for else_if in else_ifs {
                 if let Value::True = self.evaluate_expr(&else_if.should_execute)? {
-                    self.evaluate_stmt(&else_if.statement);
+                    self.evaluate_stmt(&else_if.statement)?;
                     else_if_executed = true;
                     break;
                 }
@@ -134,7 +138,7 @@ impl Interpreter {
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
-                self.evaluate_stmt(statement);
+                self.evaluate_stmt(statement)?;
 
                 current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
@@ -143,7 +147,7 @@ impl Interpreter {
             }
 
             while current > end {
-                self.evaluate_stmt(statement);
+                self.evaluate_stmt(statement)?;
 
                 current -= 1.0;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
@@ -194,7 +198,7 @@ impl Interpreter {
                 );
                 RuntimeErr::Err(right_paren.line, msg);
             }
-            Ok(callee.call(arguments, self))
+            callee.call(arguments, self)
         } else {
             let msg = "Je kan alleen functies en klassen bellen.".to_string();
             Err(RuntimeErr::Err(right_paren.line, msg))
@@ -210,17 +214,17 @@ impl Interpreter {
         match token.kind {
             TokenType::Minus => match right {
                 Value::Num(num) => Ok(Value::Num(-num)),
-                _ => crash(
+                _ => Err(RuntimeErr::Err(
                     token.line,
-                    "Min kan alleen worden gebruikt voor nummers, kaaskop",
-                ),
+                    "Min kan alleen worden gebruikt voor nummers.".to_string(),
+                )),
             },
             TokenType::Bang => match right.is_true() {
                 Some(bool) => Ok(Value::from_bool(!bool)),
-                None => crash(
+                None => Err(RuntimeErr::Err(
                     token.line,
-                    "Uitroepteken kan alleen worden gebruikt op waarheidswaardes, kaaskop",
-                ),
+                    "Uitroepteken kan alleen worden gebruikt op waarheidswaardes.".to_string(),
+                )),
             },
             _ => panic!("Unreachable."),
         }
@@ -315,16 +319,14 @@ impl Interpreter {
                     if let Some(right) = right {
                         return Ok(Value::from_bool(left && right));
                     } else {
-                        crash(
-                            op.line,
-                            "'en' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
-                        );
+                        let msg =
+                            "'en' kan alleen worden gebruikt op waardigheids waarden.".to_string();
+                        Err(RuntimeErr::Err(op.line, msg))
                     }
                 } else {
-                    crash(
-                        op.line,
-                        "'en' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
-                    );
+                    let msg =
+                        "'en' kan alleen worden gebruikt op waardigheids waarden.".to_string();
+                    Err(RuntimeErr::Err(op.line, msg))
                 }
             }
 
@@ -335,18 +337,20 @@ impl Interpreter {
                             return Ok(Value::True);
                         }
                     }
-                    None => crash(
-                        op.line,
-                        "'of' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
-                    ),
+                    None => {
+                        let msg =
+                            "'of' kan alleen worden gebruikt op waardigheids waarden.".to_string();
+                        return Err(RuntimeErr::Err(op.line, msg));
+                    }
                 }
 
                 match self.evaluate_expr(right)?.is_true() {
                     Some(right) => Ok(Value::from_bool(right)),
-                    None => crash(
-                        op.line,
-                        "'of' kan alleen worden gebruikt op waardigheids waarden, kaaskop.",
-                    ),
+                    None => {
+                        let msg =
+                            "'of' kan alleen worden gebruikt op waardigheids waarden.".to_string();
+                        return Err(RuntimeErr::Err(op.line, msg));
+                    }
                 }
             }
             _ => panic!("Unreachable."),

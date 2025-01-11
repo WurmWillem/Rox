@@ -1,4 +1,4 @@
-roep 3 * 9;
+roep 3 * 4;
 proces p(x) {
   laat y = 3;
   geef x * 3;

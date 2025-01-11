@@ -1,7 +1,7 @@
 use std::fs;
 
 use crate::{
-    error::{crash, rox_error, RuntimeErr},
+    error::{crash, RuntimeErr},
     interpreter::Interpreter,
     parser::Parser,
     scanner::Scanner,
@@ -102,6 +102,8 @@ impl Rox {
         };
 
         let mut interpreter = Interpreter::new();
-        interpreter.interpret(statements);
+        if interpreter.interpret(statements) {
+            println!("{}", "Rentijd fout(en) gedetecteerd.".purple());
+        }
     }
 }

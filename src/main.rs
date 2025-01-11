@@ -27,8 +27,8 @@ fn main() {
     } else {
         // run lox code from a prompt
         let mut input = String::new();
-        for argument in arguments {
-            let arg = format!("{} ", argument);
+        for i in 1..arguments.len() {
+            let arg = format!("{} ", arguments[i]);
             input.push_str(&arg);
         }
 
