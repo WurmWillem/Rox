@@ -1,3 +1,4 @@
+use core::panic;
 use std::fs;
 
 use crate::{
@@ -53,7 +54,9 @@ impl Rox {
         let value = match interpreter.evaluate_expr(&expr) {
             Ok(value) => value,
             Err(err) => {
-                let RuntimeErr::Err(line, msg) = err;
+                let RuntimeErr::Err(line, msg) = err else {
+                    panic!("Unreachable.");
+                };
                 crash(line, &msg);
             }
         };

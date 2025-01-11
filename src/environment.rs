@@ -38,11 +38,12 @@ impl Env {
     }
 
     pub fn insert_value(&mut self, name: &String, value: Value) {
-        if let Some(ref mut child) = self.child {
-            child.insert_value(&name, value);
-            return;
+        match self.child {
+            Some(ref mut child) => child.insert_value(&name, value),
+            None => {
+                self.vars.insert(name.clone(), value);
+            }
         }
-        self.vars.insert(name.clone(), value);
     }
 
     pub fn get_value(&self, token: &Token) -> Option<Value> {

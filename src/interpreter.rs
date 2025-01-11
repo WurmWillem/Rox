@@ -29,8 +29,10 @@ impl Interpreter {
             if let Err(e) = self.evaluate_stmt(&statement) {
                 error_found = true;
 
-                let RuntimeErr::Err(line, msg) = e;
-                rox_error(line, &msg);
+                match e {
+                    RuntimeErr::Err(line, msg) => rox_error(line, &msg),
+                    RuntimeErr::Return { .. } => rox_error(0, "Onverwachtte geef."),
+                }
             }
         }
         error_found
@@ -76,10 +78,11 @@ impl Interpreter {
                 self.env.insert_value(&funtion.name.lexeme, function);
             }
 
-            Stmt::Return {
-                keyword: _,
-                expr: _,
-            } => todo!(),
+            Stmt::Return { expr, .. } => {
+                return Err(RuntimeErr::Return {
+                    value: self.evaluate_expr(expr)?,
+                });
+            }
         }
         Ok(())
     }

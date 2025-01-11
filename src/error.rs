@@ -17,11 +17,11 @@ pub fn crash(line: usize, message: &str) -> ! {
 
 #[derive(Debug, Clone)]
 pub enum RoxError {
-    Return { value: Value },
     ScanError,
     ParseError { line: usize, msg: String },
 }
 
 pub enum RuntimeErr {
-    Err(usize, String)
+    Err(usize, String),
+    Return { value: Value },
 }

@@ -3,7 +3,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::{error::RuntimeErr, interpreter::Interpreter, stmt::Stmt, token::Token, value::Value};
 
 pub trait Callable: std::fmt::Debug + CallableClone {
-    fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Result<Value, RuntimeErr>;
+    fn call(
+        &self,
+        arguments: Vec<Value>,
+        interpreter: &mut Interpreter,
+    ) -> Result<Value, RuntimeErr>;
     fn arity(&self) -> usize;
     fn to_string(&self) -> String;
 }
@@ -30,7 +34,7 @@ where
 #[derive(Debug, Clone)]
 pub struct Clock;
 impl Callable for Clock {
-    fn call(&self, _: Vec<Value>, _: &mut Interpreter) -> Result<Value, RuntimeErr>  {
+    fn call(&self, _: Vec<Value>, _: &mut Interpreter) -> Result<Value, RuntimeErr> {
         let current_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -54,7 +58,11 @@ pub struct FunDeclaration {
     pub body: Box<Stmt>,
 }
 impl Callable for FunDeclaration {
-    fn call(&self, arguments: Vec<Value>, interpreter: &mut Interpreter) -> Result<Value, RuntimeErr> {
+    fn call(
+        &self,
+        arguments: Vec<Value>,
+        interpreter: &mut Interpreter,
+    ) -> Result<Value, RuntimeErr> {
         interpreter.env.create_new_child();
 
         for i in 0..self.params.len() {
@@ -63,7 +71,12 @@ impl Callable for FunDeclaration {
                 .insert_value(&self.params[i].lexeme, arguments[i].clone())
         }
 
-        interpreter.evaluate_stmt(&self.body)?;
+        if let Err(e) = interpreter.evaluate_stmt(&self.body) {
+            match e {
+                RuntimeErr::Return { value } => return Ok(value),
+                RuntimeErr::Err(line, msg) => return Err(RuntimeErr::Err(line, msg)),
+            }
+        }
 
         interpreter.env.kill_youngest_child();
         Ok(Value::Nil)
