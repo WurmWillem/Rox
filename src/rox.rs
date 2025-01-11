@@ -21,7 +21,7 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scan error(s) detected, aborting.".purple());
+                println!("{}", "Scanfout(en) gedetecteerd, programma wordt gestopt.".purple());
                 return;
             },
         };
@@ -30,7 +30,7 @@ impl Rox {
         let expr = match parser.parse_expr() {
             Ok(expr) => expr,
             Err(_) => {
-                println!("{}", "Parsing error(s) detected, aborting.".purple());
+                println!("{}", "Parsingfout(en) gedetecteerd,  programma wordt gestopt.".purple());
                 return;
             },
         };
@@ -56,7 +56,7 @@ impl Rox {
         let tokens = match scanner.scan_tokens() {
             Ok(tokens) => tokens,
             Err(_) => {
-                println!("{}", "Scan error(s) detected, aborting.".purple());
+                println!("{}", "Scan error(s) detected, programma wordt gestopt.".purple());
                 return;
             },
         };
@@ -73,7 +73,7 @@ impl Rox {
         let statements = match parser.parse_statements() {
             Some(statements) => statements,
             None => {
-                println!("{}", "Parsing error(s) detected, aborting.".purple());
+                println!("{}", "Parsingfout(en) gedetecteerd, programma wordt gestopt.".purple());
                 return;
             },
         };
