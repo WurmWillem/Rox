@@ -158,11 +158,14 @@ impl Parser {
     }
 
     fn return_statement(&mut self) -> Result<Stmt, RoxError> {
+        let keyword = self.previous();
+
         let mut expr = Expr::Lit(Literal::Nil);
         if let Ok(new_expr) = self.expression() {
             expr = new_expr;
         }
-        let keyword = self.consume(TokenType::Semicolon, "verwachtte ';' na geef statement.")?;
+
+        self.consume(TokenType::Semicolon, "verwachtte ';' na geef statement.")?;
         Ok(Stmt::Return { keyword, expr })
     }
 

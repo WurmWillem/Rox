@@ -147,30 +147,35 @@ impl Interpreter {
             Expr::Var(token) => self.evaluate_var_expr(token),
             Expr::Assign(name, expr) => self.evaluate_assign_expr(name, expr),
             Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
-            Expr::Call(callee, right_paren, arguments) => {
-                let callee = self.evaluate_expr(callee);
-                let arguments: Vec<Value> = arguments
-                    .iter()
-                    .map(|arg| self.evaluate_expr(arg))
-                    .collect();
-
-                if let Value::Callable(callee) = callee {
-                    if callee.arity() != arguments.len() {
-                        let msg = format!(
-                            "Verwachtte {} argumenten maar kreeg er {}",
-                            callee.arity(),
-                            arguments.len(),
-                        );
-                        crash(right_paren.line, &msg);
-                    }
-                    callee.call(arguments, self)
-                } else {
-                    crash(right_paren.line, "Je kan alleen functies en klassen bellen");
-                }
+            Expr::Call(callee, right_paren, args) => {
+                self.evaluate_call_expr(callee, right_paren, args)
             }
         }
     }
 
+    fn evaluate_call_expr(
+        &mut self,
+        callee: &Expr,
+        right_paren: &Token,
+        args: &Vec<Box<Expr>>,
+    ) -> Value {
+        let callee = self.evaluate_expr(callee);
+        let arguments: Vec<Value> = args.iter().map(|arg| self.evaluate_expr(arg)).collect();
+
+        if let Value::Callable(callee) = callee {
+            if callee.arity() != arguments.len() {
+                let msg = format!(
+                    "Verwachtte {} argumenten maar kreeg er {}",
+                    callee.arity(),
+                    arguments.len(),
+                );
+                crash(right_paren.line, &msg);
+            }
+            callee.call(arguments, self)
+        } else {
+            crash(right_paren.line, "Je kan alleen functies en klassen bellen");
+        }
+    }
     fn evaluate_unary_expr(&mut self, token: &Token, expr: &Box<Expr>) -> Value {
         let right = self.evaluate_expr(expr);
 
