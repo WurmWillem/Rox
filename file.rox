@@ -1,27 +1,18 @@
 proces fib(n) {
-  roep n;
-  als n <= 1 geef n;
-  geef fib(n - 2) + fib(n - 1);
+  roep "entered";
+  als n <= 1 {
+    geef 1;
+  }
+  
+  //roep n;
+  laat x = fib(n - 1);
+  geef x;
 }
 
-proces t(x) {
-  als x >= 5 geef x;
-  roep x;
-  t(x+1);
-}
-//t(0);
+roep fib(2);
 
-//voor i van 0 tot 10
- roep fib(2);
 
 /*
-   proces d(x) {
-   roep x;
-   geef 3;
-   roep x;
-   }
-   roep d(5);
-
 laat x = 1 + 2;
 scanner     -> Token[Var, x, equals, 1, +, 2, Semicolon]
 parser      -> Stmt::Var(x, expr::binary(1, +, 2))

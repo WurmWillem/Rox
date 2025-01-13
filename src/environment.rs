@@ -14,7 +14,22 @@ impl Env {
         }
     }
 
+    pub fn print_children(&self, i: usize) {
+        //println!("{}: {:?}", i, self.vars);
+        //println!("{:?}", i);
+        for (name, value) in self.vars.clone().into_iter() {
+            if name == "n" {
+                println!("{}: {:?}", i, value);
+            }
+        }
+        match &self.child {
+            Some(child) => child.print_children(i + 1),
+            None => return,
+        }
+    }
+
     pub fn create_new_child(&mut self) {
+        dbg!("created");
         match &mut self.child {
             Some(child) => child.create_new_child(),
             None => self.child = Some(Box::new(Env::new())),
