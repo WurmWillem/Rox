@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::{
     callable::FunDeclaration,
     error::{rox_error, RoxError},
@@ -133,7 +135,13 @@ impl Parser {
         let msg = format!("Verwachtte '{{' na de {} naam.", kind);
         self.consume(TokenType::LeftBrace, &msg)?;
 
-        let body = Box::new(self.block_statement()?);
+        let body = match self.block_statement()? {
+            Stmt::Block(statements) => statements,
+            _ => panic!("Unreachable."),
+        };
+        for stmt in &body  {
+           //dbg!(stmt); 
+        }
 
         Ok(Stmt::Function(FunDeclaration { name, params, body }))
     }

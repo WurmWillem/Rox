@@ -1,16 +1,13 @@
 proces fib(n) {
-  roep "entered";
   als n <= 1 {
-    geef 1;
+    geef n;
   }
   
-  //roep n;
-  laat x = fib(n - 1);
+  laat x = fib(n - 1) + fib(n - 2);
   geef x;
 }
 
-roep fib(2);
-
+roep fib(6);
 
 /*
 laat x = 1 + 2;

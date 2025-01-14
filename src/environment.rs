@@ -29,7 +29,7 @@ impl Env {
     }
 
     pub fn create_new_child(&mut self) {
-        dbg!("created");
+        //dbg!("created");
         match &mut self.child {
             Some(child) => child.create_new_child(),
             None => self.child = Some(Box::new(Env::new())),
@@ -37,6 +37,7 @@ impl Env {
     }
 
     pub fn kill_youngest_child(&mut self) -> bool {
+        //dbg!("killed");
         match &mut self.child {
             Some(child) => {
                 if !child.kill_youngest_child() {

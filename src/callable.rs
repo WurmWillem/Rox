@@ -55,7 +55,7 @@ impl Callable for Clock {
 pub struct FunDeclaration {
     pub name: Token,
     pub params: Vec<Token>,
-    pub body: Box<Stmt>,
+    pub body: Vec<Stmt>,
 }
 impl Callable for FunDeclaration {
     fn call(
@@ -63,9 +63,8 @@ impl Callable for FunDeclaration {
         arguments: Vec<Value>,
         interpreter: &mut Interpreter,
     ) -> Result<Value, RuntimeErr> {
-
-        //interpreter.env.create_new_child();
-
+        //dbg!("created in func");
+        interpreter.env.create_new_child();
 
         for i in 0..self.params.len() {
             interpreter
@@ -74,17 +73,16 @@ impl Callable for FunDeclaration {
         }
 
         // problem is that new scope is made for every block
-        //println!("print");
-        //interpreter.env.print_children(0);
-
-        let x = interpreter.evaluate_stmt(&self.body);
-
-        //interpreter.env.kill_youngest_child();
-
-        if let Err(e) = x {
-            match e {
-                RuntimeErr::Return { value } => return Ok(value),
-                RuntimeErr::Err(line, msg) => return Err(RuntimeErr::Err(line, msg)),
+        println!("print");
+        interpreter.env.print_children(0);
+        for stmt in &self.body {
+            if let Err(e) = interpreter.evaluate_stmt(stmt) {
+                //dbg!("killed func");
+                interpreter.env.kill_youngest_child();
+                match e {
+                    RuntimeErr::Return { value } => return Ok(value),
+                    RuntimeErr::Err(line, msg) => return Err(RuntimeErr::Err(line, msg)),
+                }
             }
         }
 

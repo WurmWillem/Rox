@@ -89,8 +89,13 @@ impl Interpreter {
 
     fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) -> Result<(), RuntimeErr> {
         self.env.create_new_child();
+        //dbg!("created in block");
         for stmt in statements {
-            self.evaluate_stmt(stmt)?;
+            if let Err(e) = self.evaluate_stmt(stmt) {
+                self.env.kill_youngest_child();
+                //dbg!("killed in block");
+                return Err(e);
+            }
         }
         self.env.kill_youngest_child();
         Ok(())
@@ -142,6 +147,10 @@ impl Interpreter {
 
             while current < end {
                 self.evaluate_stmt(statement)?;
+                if let Err(e) = self.evaluate_stmt(statement) {
+                    self.env.kill_youngest_child();
+                    return Err(e);
+                }
 
                 current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
