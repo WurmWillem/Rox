@@ -1,12 +1,7 @@
-proces fib(n) {
-  als n <= 1 {
-    geef n;
-  }
-  
-  geef fib(n - 1) + fib(n - 2);
-}
-
-roep fib(30);
+laat old = klok();
+roep fib(100);
+laat new = klok();
+roep new - old;
 
 /*
 laat x = 1 + 2;

@@ -5,7 +5,7 @@ pub enum Value {
     Nil,
     True,
     False,
-    Num(f64),
+    Num(i64),
     Str(String),
     Callable(Box<dyn Callable>),
 }

@@ -1,5 +1,5 @@
 use crate::{
-    callable::Clock,
+    callable::{Clock, Factorial, Fibonacci},
     environment::Env,
     error::{rox_error, RuntimeErr},
     expr::Expr,
@@ -16,8 +16,14 @@ impl Interpreter {
     pub fn new() -> Self {
         let mut env = Env::new();
 
+        let fact = Value::Callable(Box::new(Factorial {}));
+        env.insert_global_value("fact".to_string(), fact);
+
         let clock = Value::Callable(Box::new(Clock {}));
-        env.insert_global_value("clock".to_string(), clock);
+        env.insert_global_value("klok".to_string(), clock);
+
+        let fib = Value::Callable(Box::new(Fibonacci {}));
+        env.insert_global_value("fib".to_string(), fib);
 
         Self { env }
     }
@@ -153,7 +159,7 @@ impl Interpreter {
                     return Err(e);
                 }
 
-                current += 1.;
+                current += 1;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
@@ -163,7 +169,7 @@ impl Interpreter {
             while current > end {
                 self.evaluate_stmt(statement)?;
 
-                current -= 1.0;
+                current -= 1;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
@@ -211,7 +217,7 @@ impl Interpreter {
                     callee.arity(),
                     arguments.len(),
                 );
-                RuntimeErr::Err(right_paren.line, msg);
+                return Err(RuntimeErr::Err(right_paren.line, msg));
             }
             callee.call(arguments, self)
         } else {
@@ -299,7 +305,12 @@ impl Interpreter {
             TokenType::Slash => apply_arith_to_nums!(Slash, /),
 
             TokenType::Caret => match (left, right) {
-                (Value::Num(num1), Value::Num(num2)) => return Ok(Value::Num(num1.powf(num2))),
+                (Value::Num(num1), Value::Num(mut num2)) => {
+                    if num2 < 0 {
+                       num2 *= -1; 
+                    }
+                    let num2 = num2 as u32;
+                    return Ok(Value::Num(num1.pow(num2)))},
                 _ => Err(RuntimeErr::Err(
                     op.line,
                     "'^' kan alleen worden gebruikt op nummers.".to_string(),
