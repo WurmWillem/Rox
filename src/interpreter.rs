@@ -148,7 +148,6 @@ impl Interpreter {
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
-                self.evaluate_stmt(statement)?;
                 if let Err(e) = self.evaluate_stmt(statement) {
                     self.env.kill_youngest_child();
                     return Err(e);
@@ -156,6 +155,7 @@ impl Interpreter {
 
                 current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                    self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
                 }
             }
@@ -165,6 +165,7 @@ impl Interpreter {
 
                 current -= 1.0;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                    self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
                 }
             }

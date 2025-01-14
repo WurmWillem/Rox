@@ -1,4 +1,12 @@
-Hello \" + \"World!\"
+proces fib(n) {
+  als n <= 1 {
+    geef n;
+  }
+  
+  geef fib(n - 1) + fib(n - 2);
+}
+
+roep fib(30);
 
 /*
 laat x = 1 + 2;

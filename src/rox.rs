@@ -64,10 +64,6 @@ impl Rox {
         println!("{}", value.to_string());
     }
 
-    //pub fn run_string(&mut self, source: &str) -> Value {
-    //    self.run(source.to_string())
-    //}
-
     pub fn run_file(&mut self, source: &str) -> Value {
         let source = fs::read_to_string(source).expect("file.rox is niet gevonden. het moet in dezelfde directory als de binary of Cargo.toml zitten.");
         let source = source.to_string();
@@ -124,7 +120,7 @@ mod tests {
     #[test]
     fn hello() {
         let source = "
-            geef \"Hello \" + \"World!\""
+            geef \"Hello \" + \"World!\";"
             .to_string();
 
         let mut lox = Rox::new();
@@ -136,6 +132,89 @@ mod tests {
         };
 
         assert_eq!(str, "Hello World!");
+    }
+
+    #[test]
+    fn while_loop() {
+        let source = "
+            laat i = 0;
+            terwijl i < 10 {
+              i = i + 1;
+            }
+            geef i;"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let num = match value {
+            Value::Num(num) => num,
+            _ => panic!("Expected Num."),
+        };
+
+        assert_eq!(num, 10.);
+    }
+
+    #[test]
+    fn for_loop() {
+        let source = "
+            laat x = 0;
+            voor i van 0 tot 10
+                x = i;
+
+            geef x;"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let num = match value {
+            Value::Num(num) => num,
+            _ => panic!("Expected Num."),
+        };
+
+        assert_eq!(num, 9.);
+    }
+
+    #[test]
+    fn reverse_for_loop() {
+        let source = "
+            laat x = 0;
+            voor i van 10 tot 0
+                x = i;
+
+            geef x;"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let num = match value {
+            Value::Num(num) => num,
+            _ => panic!("Expected Num."),
+        };
+
+        assert_eq!(num, 1.);
+    }
+
+    #[test]
+    fn area() {
+        let source = "
+            laat breedte = 3;
+            laat lengte = 5;
+
+            geef \"oppervlakte = \" + breedte * lengte;"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let str = match value {
+            Value::Str(str) => str,
+            _ => panic!("Expected String."),
+        };
+
+        assert_eq!(str, "oppervlakte = 15");
     }
 
     #[test]
