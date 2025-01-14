@@ -63,7 +63,6 @@ impl Callable for FunDeclaration {
         arguments: Vec<Value>,
         interpreter: &mut Interpreter,
     ) -> Result<Value, RuntimeErr> {
-        //dbg!("created in func");
         interpreter.env.create_new_child();
 
         for i in 0..self.params.len() {
@@ -72,12 +71,8 @@ impl Callable for FunDeclaration {
                 .insert_value(&self.params[i].lexeme, arguments[i].clone())
         }
 
-        // problem is that new scope is made for every block
-        println!("print");
-        interpreter.env.print_children(0);
         for stmt in &self.body {
             if let Err(e) = interpreter.evaluate_stmt(stmt) {
-                //dbg!("killed func");
                 interpreter.env.kill_youngest_child();
                 match e {
                     RuntimeErr::Return { value } => return Ok(value),

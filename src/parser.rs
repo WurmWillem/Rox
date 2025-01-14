@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{
     callable::FunDeclaration,
     error::{rox_error, RoxError},
@@ -139,9 +137,9 @@ impl Parser {
             Stmt::Block(statements) => statements,
             _ => panic!("Unreachable."),
         };
-        for stmt in &body  {
+        //for stmt in &body  {
            //dbg!(stmt); 
-        }
+        //}
 
         Ok(Stmt::Function(FunDeclaration { name, params, body }))
     }

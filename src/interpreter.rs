@@ -22,8 +22,9 @@ impl Interpreter {
         Self { env }
     }
 
-    pub fn interpret(&mut self, statements: Vec<Stmt>) -> bool {
+    pub fn interpret(&mut self, statements: Vec<Stmt>) -> (bool, Value) {
         let mut error_found = false;
+        let mut return_val = Value::Nil;
 
         for statement in statements {
             if let Err(e) = self.evaluate_stmt(&statement) {
@@ -31,11 +32,14 @@ impl Interpreter {
 
                 match e {
                     RuntimeErr::Err(line, msg) => rox_error(line, &msg),
-                    RuntimeErr::Return { .. } => rox_error(0, "Onverwachtte geef."),
+                    RuntimeErr::Return { value } => {
+                        rox_error(0, "Onverwachtte geef.");
+                        return_val = value;
+                    }
                 }
             }
         }
-        error_found
+        (error_found, return_val)
     }
 
     pub fn evaluate_stmt(&mut self, stmt: &Stmt) -> Result<(), RuntimeErr> {
@@ -89,11 +93,9 @@ impl Interpreter {
 
     fn evaluate_block_stmt(&mut self, statements: &Vec<Stmt>) -> Result<(), RuntimeErr> {
         self.env.create_new_child();
-        //dbg!("created in block");
         for stmt in statements {
             if let Err(e) = self.evaluate_stmt(stmt) {
                 self.env.kill_youngest_child();
-                //dbg!("killed in block");
                 return Err(e);
             }
         }

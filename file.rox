@@ -1,13 +1,4 @@
-proces fib(n) {
-  als n <= 1 {
-    geef n;
-  }
-  
-  laat x = fib(n - 1) + fib(n - 2);
-  geef x;
-}
-
-roep fib(6);
+Hello \" + \"World!\"
 
 /*
 laat x = 1 + 2;
