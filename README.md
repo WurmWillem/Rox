@@ -10,95 +10,116 @@ This is my implementation of Lox, a programming language so simple and Dutch tha
 - 😃 Because you are a masochist
 - 🥰 You want to support me
 
+
+<H3>Sneak Peek</H3>
+
+```c
+// print with 'zeg' (print without newline) en 'roep' (print with newline)
+zeg "Hallo ";   // prints "Hallo "
+roep "Wereld!"; // prints "Wereld!" with newline
+
+// declare variables with 'laat'.
+laat getal = 1 + 2 * 3; // getal holds 7
+
+// declare if statements with `als`, `anders als`, and `anders`
+// the indentation is purely for readability purposes
+laat variabele = -3.23;
+// prints "negatief nummer"
+als variabele < 0
+  roep "negatief nummer";
+anders
+  roep "positief nummer";
+
+// declare while loops with 'terwijl condition'
+laat i = 0;
+// prints 0-9 (note that 10 is not included)
+terwijl i < 10 {
+  roep i;
+  i = i + 1;
+}
+
+// declare for loops with 'voor x van lower bounds tot upper bounds'
+// prints 0-9 (note that 10 is not included)
+voor i van 0 tot 10
+  roep i;
+
+// declare functions with 'proces'
+proces keerDrie(n) {
+  geef n * 3;     // return a value with 'geef'
+}
+roep keerDrie(5); // prints 15
+
+```
+
 <H2>Features</H2>
 
-- Beautiful Dutch keywords 🇳🇱 (wellus, nietus, terwijl, ...)
-- Memory safe, as it is written in 100% safe Rust
-- Expressive expressions
-  - Arithmetic with proper precedence rules (similiar to C-like languages)
-    - Supported operators are +, -, *, /, ^ (raises a number to a given power, e.g. 2^3 = 8) 
-      
+- 🇳🇱 Beautiful Dutch keywords  (wellus, nietus, terwijl, ...)
+- 🦀 Memory safe, as it is written in 100% safe Rust 
+- 💵 Poor type system
+  - Null type: `niks`
+  - Booleans: `wellus` and `nietus`
+    supported operators: &&, ||, !, <, >, <=, >=, ==, !=
+    ```c
+    roep wellus || nietus;    // prints wellus
+    roep wellus == !!!nietus; // prints wellus
+    roep 3 < 5;               // prints wellus
     ```
-    roep 1 + 2 * 3;
-    output: 7
+  - Numbers
+    - 64-bit floating point
+    - Supported operators are +, -, *, /, ^ (raises a number to a given power, e.g. 2^3 = 8)
 
-    roep "Hallo " + "Wereld!";
-    output: Hallo Wereld!
-        
-    roep "average = " + (1 + 3) / 2;
-    output: average = 15
-    ```
-  - Logic operators that can be chained
-    - Supported logical operators are ==, >, <, >=, <= !=, !, //
-    ```
-    roep 5 == 2 + 3;
-    output: wellus
-  
-    roep (3 + 2 * 3 == 3 * (2 + 1)) == (8 >= 4);
-    output: wellus
-    ```
-- Dynamically typed mutable variables
+  - Strings
+    - The only supported operator is '+'.
+      ```c
+      roep "Hallo " + "Wereld!"'               // prints "Hallo Wereld!"
+      roep "Ik heb al " + 17 + " kokosnoten."; // prints "Ik heb al 17 kokosnoten!!"
+      ```
+- Control flow with `als` statements
+  ```c
+  als leeftijd < 18
+    roep "Je zit op school";
+  anders als leeftijd < 65
+    roep "Je bent werkende.";
+   anders
+    roep "Je bent echt megaoud lol🤣."; // yes, emojis are supported.
   ```
-  laat breedte = 3;
-  laat lengte = 5;
-
-  roep "oppervlakte = " + breedte * lengte;
-  output: oppervlakte = 15
-  ```
-- Control flow with if statements
-  ```
-  als variabele < 0
-    roep "negatief nummer";
-  anders als variabele > 0
-    roep "positief nummer";
-  anders
-    roep "het nummer is 0";
-  // The indentation is purely for readability reasons, Rox does not care about indentation.
-  ```
-  ```
-  als leeftijd >= 18 en leeftijd < 65
-    roep "Je bent een werkende volwassene.";
-  anders als leeftijd < 18 of leeftijd >= 65
-    roep "Je bent niet in de volwassen leeftijdsgroep.";
-  ```
-- While and for loops (both examples print the digits 0 up to and including 9)
-  ```
-  laat i = 0;
-  terwijl x < 10 {
-    roep x;
-    i = i + 1;
+- Functions
+  ```c
+  // function that returns the fibonacci number of its argument in an extremely inefficient manner
+  proces fib(n) {
+    als n <= 1 {
+      geef n;
+    }
+    geef fib(n - 1) + fib(n - 2);
   }
+  roep fib(6);  // prints 8
   ```
-  ```
-  voor i van 0 tot 10
-    roep i;
-  ```
-
 
 <H2>How do I use Rox?</H2>
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.
 
 
-- Create a file called "file.lox" in the same directory as the project and execute the command cargo run --release without additional arguments. this will give you full access to Rox, statements included.
-  ```
+- Create a file called "file.rox" in the same directory as the project and execute the command cargo run --release without additional arguments. This will give you full access to Rox, statements included.
+  ```rust
   cargo run --release
   ```
   
-- Or execute it with the command cargo run "expression" as such. This will only work for expressions, not statements.
-  ```
+- Or execute it with the command cargo run <"expression"> as such. This will only work for expressions, not statements.
+  ```rust
   cargo run "1 + 1"
-  output: 2
+  // prints 2
   ```
 
 
 <H2>Roadmap</H2>
 
-- Add functions
+- Expand standard library
+- Add Arrays
 - Add enums
-- Remove null and replace it with Option<T> enum
 - Add more string related operations on strings
-- Add some syntactic sugar for mutating variables (+=, -=, *=, /=, ++, --)
+- Add some syntactic sugar for mutating variables (+=, -=, *=, /=, ++, --, ..)
 - Add break and continue statements
+- ✅ Add functions
 - ✅ Add loops
 - ✅ Add if statements
 - ✅ Add variable scope
