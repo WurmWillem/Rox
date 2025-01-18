@@ -1,8 +1,22 @@
 laat old = klok();
-roep fib(100);
+roep fib(90);
 laat new = klok();
 roep new - old;
 
+proces keerDrie(n) {
+  geef n * 3;
+}
+roep keerDrie(5);
+
+ proces fib(n) {
+    als n <= 1 {
+      geef n;
+    }
+    geef fib(n - 1) + fib(n - 2);
+  }
+  
+  roep fib(6);
+roep "Je bent echt megaoud lol🤣.";
 /*
 laat x = 1 + 2;
 scanner     -> Token[Var, x, equals, 1, +, 2, Semicolon]
