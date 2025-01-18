@@ -222,7 +222,7 @@ impl Scanner {
         }
 
         let num = self.source[self.start..self.current].to_string();
-        let num = num.parse::<i64>().unwrap();
+        let num = num.parse::<f64>().unwrap();
         self.add_lit_token(TokenType::Number, Literal::Num(num))
     }
 

@@ -1,6 +1,12 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{time::{SystemTime, UNIX_EPOCH}, usize};
 
-use crate::{error::{rox_error, RuntimeErr}, interpreter::Interpreter, stmt::Stmt, token::Token, value::Value};
+use crate::{
+    error::{rox_error, RuntimeErr},
+    interpreter::Interpreter,
+    stmt::Stmt,
+    token::Token,
+    value::Value,
+};
 
 pub trait Callable: std::fmt::Debug + CallableClone {
     fn call(
@@ -38,8 +44,8 @@ impl Callable for Clock {
         let current_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs();
-        Ok(Value::Num(current_time as i64))
+            .as_secs_f64();
+        Ok(Value::Num(current_time))
     }
 
     fn arity(&self) -> usize {
@@ -63,12 +69,12 @@ impl Callable for Factorial {
                     "Je kan fact(n) alleen gebruiken op nummers.".to_string(),
                 ))
             }
-        };
+        } as usize;
         for i in 2..result {
             result *= i;
         }
 
-        Ok(Value::Num(result))
+        Ok(Value::Num(result as f64))
     }
 
     fn arity(&self) -> usize {
@@ -106,11 +112,11 @@ impl Callable for Fibonacci {
         let mut result = a as i64;
 
         if a > i64::max_value() as u128 {
-           result = i64::max_value(); 
-           rox_error(0, "overvloei is gebeurt in fib functie.");
+            result = i64::max_value();
+            rox_error(0, "overvloei is gebeurt in fib functie.");
         }
 
-        Ok(Value::Num(result))
+        Ok(Value::Num(result as f64))
     }
 
     fn arity(&self) -> usize {

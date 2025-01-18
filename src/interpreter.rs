@@ -159,7 +159,7 @@ impl Interpreter {
                     return Err(e);
                 }
 
-                current += 1;
+                current += 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
@@ -169,7 +169,7 @@ impl Interpreter {
             while current > end {
                 self.evaluate_stmt(statement)?;
 
-                current -= 1;
+                current -= 1.;
                 if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
                     return Err(RuntimeErr::Err(name.line, msg));
@@ -305,12 +305,11 @@ impl Interpreter {
             TokenType::Slash => apply_arith_to_nums!(Slash, /),
 
             TokenType::Caret => match (left, right) {
-                (Value::Num(num1), Value::Num(mut num2)) => {
-                    if num2 < 0 {
-                       num2 *= -1; 
-                    }
-                    let num2 = num2 as u32;
-                    return Ok(Value::Num(num1.pow(num2)))},
+                (Value::Num(num1), Value::Num(num2)) => {
+                    //if num2 < 0 {
+                    //   num2 *= -1; 
+                    //}
+                    return Ok(Value::Num(num1.powf(num2)))},
                 _ => Err(RuntimeErr::Err(
                     op.line,
                     "'^' kan alleen worden gebruikt op nummers.".to_string(),

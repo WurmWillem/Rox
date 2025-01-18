@@ -65,7 +65,7 @@ impl Rox {
     }
 
     pub fn run_file(&mut self, source: &str) -> Value {
-        let source = fs::read_to_string(source).expect("file.rox is niet gevonden. het moet in dezelfde directory als de binary of Cargo.toml zitten.");
+        let source = fs::read_to_string(source).expect("file.rox is niet gevonden. Het moet in dezelfde directory als de binary of Cargo.toml zitten.");
         let source = source.to_string();
         self.run(source)
     }

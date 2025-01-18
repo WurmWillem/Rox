@@ -6,7 +6,7 @@ use crate::token_type::TokenType;
 pub enum Literal {
     None,
     Str(String),
-    Num(i64),
+    Num(f64),
     True,
     False,
     Nil,
