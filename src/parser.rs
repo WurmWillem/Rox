@@ -449,7 +449,7 @@ impl Parser {
             Ok(self.advance())
         } else {
             Err(RoxError::ParseError {
-                line: self.peek().line,
+                line: self.previous().line,
                 msg: msg.to_string(),
             })
         }
