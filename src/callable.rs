@@ -158,6 +158,7 @@ impl Callable for FunDeclaration {
             }
         }
 
+        interpreter.env.kill_youngest_child();
         Ok(Value::Nil)
     }
 

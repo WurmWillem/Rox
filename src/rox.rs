@@ -218,7 +218,7 @@ mod tests {
     }
 
     #[test]
-    fn run() {
+    fn fib() {
         let source = "
         proces fib(n) {
           als n <= 1 {
@@ -241,5 +241,25 @@ mod tests {
         };
 
         assert_eq!(num, 8.);
+    }
+
+    #[test]
+    fn fun() {
+        let source = "
+        proces geefDrie() {
+            geef 3;     
+        }
+        geef geefDrie();"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let num = match value {
+            Value::Num(num) => num,
+            _ => panic!("Expected num."),
+        };
+
+        assert_eq!(num, 3.);
     }
 }

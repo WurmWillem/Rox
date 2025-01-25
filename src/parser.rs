@@ -126,9 +126,9 @@ impl Parser {
             while self.matches(vec![TokenType::Comma]) {
                 params.push(self.consume(TokenType::Identifier, "Verwachtte parameter na comma.")?)
             }
+            self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.")?;
         }
 
-        self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.")?;
 
         let msg = format!("Verwachtte '{{' na de {} naam.", kind);
         self.consume(TokenType::LeftBrace, &msg)?;
