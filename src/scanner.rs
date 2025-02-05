@@ -156,7 +156,8 @@ impl Scanner {
 
                     self.add_token(kind);
                 } else {
-                    rox_error(self.line, "Onverwacht karakter.");
+                    let msg = format!("'{}' is een ongeldig karakter.", c);
+                    rox_error(self.line,&msg);
                     self.had_error = true;
                 }
             }

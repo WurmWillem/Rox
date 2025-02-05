@@ -45,24 +45,24 @@ impl Parser {
     }
 
     fn or(&mut self) -> Result<Expr, RoxError> {
-        let left = self.and()?;
+        let mut left = self.and()?;
 
         while self.matches(vec![TokenType::Or]) {
             let op = self.previous();
             let right = self.and()?;
-            return Ok(Expr::Logic(Box::new(left), op, Box::new(right)));
+            left =  Expr::Logic(Box::new(left), op, Box::new(right));
         }
 
         Ok(left)
     }
 
     fn and(&mut self) -> Result<Expr, RoxError> {
-        let left = self.equality()?;
+        let mut left = self.equality()?;
 
         while self.matches(vec![TokenType::And]) {
             let op = self.previous();
             let right = self.equality()?;
-            return Ok(Expr::Logic(Box::new(left), op, Box::new(right)));
+            left =  Expr::Logic(Box::new(left), op, Box::new(right));
         }
 
         Ok(left)

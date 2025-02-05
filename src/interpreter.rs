@@ -1,6 +1,3 @@
-use core::panic;
-use std::usize;
-
 use crate::{
     callable::{Clock, Factorial, Fibonacci},
     environment::Env,
@@ -224,8 +221,8 @@ impl Interpreter {
 
     fn evaluate_element_expr(
         &mut self,
-        var: &Box<Expr>,
-        index: &Box<Expr>,
+        var: &Expr,
+        index: &Expr,
         right_bracket: &Token,
     ) -> Result<Value, RuntimeErr> {
         let index = self.evaluate_expr(index)?;
@@ -251,12 +248,12 @@ impl Interpreter {
 
     fn evaluate_assign_to_element_expr(
         &mut self,
-        var: &Box<Expr>,
-        index: &Box<Expr>,
-        value: &Box<Expr>,
+        var: &Expr,
+        index: &Expr,
+        value: &Expr,
     ) -> Result<Value, RuntimeErr> {
-        match **var {
-            Expr::Var(ref name) => {
+        match var {
+            Expr::Var(name) => {
                 let index = self.evaluate_expr(index)?;
                 let index = match index {
                     Value::Num(num) => num as usize,
@@ -307,7 +304,7 @@ impl Interpreter {
     fn evaluate_unary_expr(
         &mut self,
         token: &Token,
-        expr: &Box<Expr>,
+        expr: &Expr,
     ) -> Result<Value, RuntimeErr> {
         let right = self.evaluate_expr(expr)?;
 
@@ -332,9 +329,9 @@ impl Interpreter {
 
     fn evaluate_binary_expr(
         &mut self,
-        left: &Box<Expr>,
+        left: &Expr,
         op: &Token,
-        right: &Box<Expr>,
+        right: &Expr,
     ) -> Result<Value, RuntimeErr> {
         let left = self.evaluate_expr(left)?;
         let right = self.evaluate_expr(right)?;
@@ -388,7 +385,7 @@ impl Interpreter {
                     //if num2 < 0 {
                     //   num2 *= -1;
                     //}
-                    return Ok(Value::Num(num1.powf(num2)));
+                    Ok(Value::Num(num1.powf(num2)))
                 }
                 _ => Err(RuntimeErr::Err(
                     op.line,
@@ -410,7 +407,7 @@ impl Interpreter {
 
     fn evaluate_logic_expr(
         &mut self,
-        left: &Box<Expr>,
+        left: &Expr,
         op: &Token,
         right: &Expr,
     ) -> Result<Value, RuntimeErr> {

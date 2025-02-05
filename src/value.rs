@@ -27,7 +27,7 @@ impl Value {
                 }
 
                 out.push_str(&elements[elements.len() - 1].to_string());
-                out.push_str("]");
+                out.push(']');
                 out
             }
         }

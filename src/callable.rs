@@ -1,4 +1,4 @@
-use std::{time::{SystemTime, UNIX_EPOCH}, usize};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::{
     error::{rox_error, RuntimeErr},

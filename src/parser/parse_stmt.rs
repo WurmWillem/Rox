@@ -60,26 +60,26 @@ impl Parser {
     pub fn declaration(&mut self) -> Result<Stmt, RoxError> {
         if self.matches(vec![TokenType::Var]) {
             match self.var_declaration() {
-                Ok(stmt) => return Ok(stmt),
+                Ok(stmt) => Ok(stmt),
                 Err(e) => {
                     self.synchronize();
-                    return Err(e);
+                    Err(e)
                 }
             }
         } else if self.matches(vec![TokenType::Fun]) {
             match self.fun_declaration("functie") {
-                Ok(stmt) => return Ok(stmt),
+                Ok(stmt) => Ok(stmt),
                 Err(e) => {
                     self.synchronize();
-                    return Err(e);
+                    Err(e)
                 }
             }
         } else {
             match self.statement() {
-                Ok(stmt) => return Ok(stmt),
+                Ok(stmt) => Ok(stmt),
                 Err(e) => {
                     self.synchronize();
-                    return Err(e);
+                    Err(e)
                 }
             }
         }
