@@ -396,9 +396,9 @@ impl Parser {
         let mut arguments = Vec::new();
 
         if !self.check(TokenType::RightParen) {
-            arguments.push(Box::new(self.expression()?));
+            arguments.push(self.expression()?);
             while self.matches(vec![TokenType::Comma]) {
-                arguments.push(Box::new(self.expression()?));
+                arguments.push(self.expression()?);
             }
         }
 

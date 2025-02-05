@@ -9,7 +9,8 @@ pub enum Expr {
     Binary(Box<Expr>, Token, Box<Expr>),
     Var(Token),
     Assign(Token, Box<Expr>),
-    Call(Box<Expr>, Token, Vec<Box<Expr>>),
+    Call(Box<Expr>, Token, Vec<Expr>),
+    //Arr(Box<Expr>, Token, Vec<Box<Expr>>),
 }
 // used for debugging purposes
 impl Expr {

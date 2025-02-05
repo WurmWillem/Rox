@@ -201,7 +201,7 @@ impl Interpreter {
         &mut self,
         callee: &Expr,
         right_paren: &Token,
-        args: &Vec<Box<Expr>>,
+        args: &Vec<Expr>,
     ) -> Result<Value, RuntimeErr> {
         let callee = self.evaluate_expr(callee)?;
 
