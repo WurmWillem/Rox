@@ -14,6 +14,7 @@ pub enum Expr {
     Index {
         var: Box<Expr>,
         index: Box<Expr>,
+        right_bracket: Token,
     }
 }
 // used for debugging purposes
@@ -38,7 +39,7 @@ impl Expr {
             Expr::Var(_) => panic!("Unreachable."),
             Expr::Call(_, _, _) => panic!("Unreachable."),
             Expr::List(_) => panic!("Unreachable."),
-            Expr::Index{var: _, index: _ } => panic!("Unreachable."),
+            Expr::Index{right_bracket: _, var: _, index: _ } => panic!("Unreachable."),
         }
     }
 }

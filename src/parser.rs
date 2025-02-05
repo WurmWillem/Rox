@@ -405,11 +405,13 @@ impl Parser {
 
         if self.matches(vec![TokenType::LeftBracket]) {
             let index = self.expression()?;
+            let right_bracket = self.consume(TokenType::RightBracket, "Verwachtte ']' na index")?;
+
             var = Expr::Index {
                 var: Box::new(var),
                 index: Box::new(index),
+                right_bracket,
             };
-            self.consume(TokenType::RightBracket, "Verwachtte ']' na index")?;
         }
 
         Ok(var)

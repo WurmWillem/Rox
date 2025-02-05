@@ -207,19 +207,30 @@ impl Interpreter {
 
                 Ok(Value::List(new_elements))
             }
-            Expr::Index { var, index } => {
+            Expr::Index {
+                var,
+                index,
+                right_bracket,
+            } => {
                 let index = self.evaluate_expr(index)?;
                 let index = match index {
                     Value::Num(num) => num,
-                    _ => todo!(),
+                    _ => {
+                        return Err(RuntimeErr::Err(
+                            right_bracket.line,
+                            "Index is geen nummer.".to_string(),
+                        ))
+                    }
                 };
 
                 let var = self.evaluate_expr(var)?;
-                let value = match var {
-                    Value::List(elements) => elements[index as usize].clone(),
-                    _ => todo!(),
-                };
-                Ok(value)
+                match var {
+                    Value::List(elements) => Ok(elements[index as usize].clone()),
+                    _ => Err(RuntimeErr::Err(
+                        right_bracket.line,
+                        "Variabele is geen lijst.".to_string(),
+                    )),
+                }
             }
         }
     }
