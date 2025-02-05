@@ -416,26 +416,16 @@ impl Parser {
             }
             self.consume(TokenType::RightBracket, "Verwachtte ']' na elementen")?;
 
-            print!("[");
-            for element in &elements {
-                print!("{:?}, ", element);
-            }
-            println!("]");
+            //print!("[");
+            //for element in &elements {
+            //    print!("{:?}, ", element);
+            //}
+            //println!("]");
 
             return Ok(Expr::List(elements));
         }
 
-        //if !self.check(TokenType::) {
-        //    elements.push(self.expression()?);
-        //    while self.matches(vec![TokenType::Comma]) {
-        //        elements.push(self.expression()?);
-        //    }
-        //}
-        //
-        //let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten")?;
-
         self.primary()
-        //Ok(Expr::Call(Box::new(callee), token, elements))
     }
 
     fn primary(&mut self) -> Result<Expr, RoxError> {

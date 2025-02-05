@@ -194,7 +194,16 @@ impl Interpreter {
             Expr::Call(callee, right_paren, args) => {
                 self.evaluate_call_expr(callee, right_paren, args)
             }
-            Expr::List(elements) => Ok(Value::True),
+            Expr::List(elements) => {
+                let mut new_elements = Vec::new();
+
+                for e in elements  {
+                   let value = self.evaluate_expr(e)?; 
+                    new_elements.push(value);
+                }
+
+                Ok(Value::List(new_elements))
+            }
         }
     }
 

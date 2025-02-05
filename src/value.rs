@@ -8,6 +8,7 @@ pub enum Value {
     Num(f64),
     Str(String),
     Callable(Box<dyn Callable>),
+    List(Vec<Value>),
 }
 impl Value {
     pub fn to_string(&self) -> String {
@@ -18,6 +19,17 @@ impl Value {
             Value::Num(num) => num.to_string(),
             Value::Str(str) => str.to_string(),
             Value::Callable(callee) => format!("<fn {}>", callee.to_string()),
+            Value::List(elements) => {
+                let mut out = "[".to_string();
+                for i in 0..(elements.len() - 1) {
+                    out.push_str(&elements[i].to_string());
+                    out.push_str(", ");
+                }
+
+                out.push_str(&elements[elements.len() - 1].to_string());
+                out.push_str("]");
+                out
+            }
         }
     }
 
