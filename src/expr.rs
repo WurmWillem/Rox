@@ -10,7 +10,8 @@ pub enum Expr {
     Var(Token),
     AssignToExpr(Token, Box<Expr>),
     AssignToElement {
-        element: Box<Expr>,
+        var: Box<Expr>,
+        index: Box<Expr>,
         value: Box<Expr>,
     },
     Call(Box<Expr>, Token, Vec<Expr>),
@@ -49,8 +50,9 @@ impl Expr {
                 index: _,
             } => panic!("Unreachable."),
             Expr::AssignToElement {
-                element: _,
+                var: _,
                 value: _,
+                index: _,
             } => panic!("Unreachable."),
         }
     }

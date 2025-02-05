@@ -1,5 +1,3 @@
-use std::env::var;
-
 use super::Parser;
 
 use crate::{error::RoxError, expr::Expr, token::Literal, token_type::TokenType};
@@ -17,25 +15,25 @@ impl Parser {
         let expr = self.or()?;
         //dbg!(expr.clone());
 
-        if self.matches(vec![TokenType::LeftBracket]) {
-            let index = Box::new(self.expression()?);
-            let right_bracket =
-                self.consume(TokenType::RightBracket, "Je bent de ']' vergeten.")?;
-
-            let element = Expr::Element {
-                var: Box::new(expr),
-                index,
-                right_bracket,
-            };
-
-            self.consume(TokenType::Equal, "Je bent de '=' vergeten.")?;
-
-            let value = Box::new(self.expression()?);
-            return Ok(Expr::AssignToElement {
-                element: Box::new(element),
-                value,
-            });
-        }
+        //if self.matches(vec![TokenType::LeftBracket]) {
+        //    let index = Box::new(self.expression()?);
+        //    let right_bracket =
+        //        self.consume(TokenType::RightBracket, "Je bent de ']' vergeten.")?;
+        //
+        //    let element = Expr::Element {
+        //        var: Box::new(expr),
+        //        index,
+        //        right_bracket,
+        //    };
+        //
+        //    self.consume(TokenType::Equal, "Je bent de '=' vergeten.")?;
+        //
+        //    let value = Box::new(self.expression()?);
+        //    return Ok(Expr::AssignToElement {
+        //        element: Box::new(element),
+        //        value,
+        //    });
+        //}
 
         if self.matches(vec![TokenType::Equal]) {
             let equals = self.previous();
@@ -44,12 +42,13 @@ impl Parser {
             match &expr {
                 Expr::Var(name) => return Ok(Expr::AssignToExpr(name.clone(), Box::new(value))),
                 Expr::Element {
-                    var: _,
-                    index: _,
+                    var,
+                    index,
                     right_bracket: _,
                 } => {
                     return Ok(Expr::AssignToElement {
-                        element: Box::new(expr),
+                        var: var.clone(),
+                        index: index.clone(),
                         value: Box::new(value),
                     });
                 }

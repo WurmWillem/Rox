@@ -232,37 +232,22 @@ impl Interpreter {
                     )),
                 }
             }
-            Expr::AssignToElement { element, value } => match **element {
-                Expr::Element {
-                    ref var,
-                    ref index,
-                    ref right_bracket,
-                } => {
+            Expr::AssignToElement { ref var, ref index, ref value } => match **var {
+                Expr::Var(ref name) => {
                     let index = self.evaluate_expr(index)?;
                     let index = match index {
-                        Value::Num(num) => num,
+                        Value::Num(num) => num as usize,
                         _ => {
                             return Err(RuntimeErr::Err(
-                                right_bracket.line,
+                                name.line,
                                 "Index is geen nummer.".to_string(),
                             ))
                         }
                     };
 
-                    let var = self.evaluate_expr(var)?;
-                    //self.env.get_value(token)
-                    match var {
-                        Value::List(mut elements) => {
-                            //self.env.replace_value(value);
-                            elements[index as usize] = self.evaluate_expr(value)?;
-                            dbg!(elements[index as usize].clone());
-                            Ok(Value::Nil)
-                        }
-                        _ => Err(RuntimeErr::Err(
-                            right_bracket.line,
-                            "Variabele is geen lijst.".to_string(),
-                        )),
-                    }
+                    let value = self.evaluate_expr(value)?;
+                    self.env.replace_element(&name, index, &value)?;
+                    Ok(Value::Nil)
                 }
                 _ => todo!(),
             },
