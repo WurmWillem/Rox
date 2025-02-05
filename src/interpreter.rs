@@ -1,3 +1,6 @@
+use core::panic;
+use std::usize;
+
 use crate::{
     callable::{Clock, Factorial, Fibonacci},
     environment::Env,
@@ -204,8 +207,19 @@ impl Interpreter {
 
                 Ok(Value::List(new_elements))
             }
-            Expr::Index{var, index} => {
-                Ok(Value::Num(5.))
+            Expr::Index { var, index } => {
+                let index = self.evaluate_expr(index)?;
+                let index = match index {
+                    Value::Num(num) => num,
+                    _ => todo!(),
+                };
+
+                let var = self.evaluate_expr(var)?;
+                let value = match var {
+                    Value::List(elements) => elements[index as usize].clone(),
+                    _ => todo!(),
+                };
+                Ok(value)
             }
         }
     }
