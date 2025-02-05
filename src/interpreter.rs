@@ -192,7 +192,7 @@ impl Interpreter {
             Expr::Unary(token, expr) => self.evaluate_unary_expr(token, expr),
             Expr::Binary(left, op, right) => self.evaluate_binary_expr(left, op, right),
             Expr::Var(token) => self.evaluate_var_expr(token),
-            Expr::Assign(name, expr) => self.evaluate_assign_expr(name, expr),
+            Expr::AssignToExpr(name, expr) => self.evaluate_assign_expr(name, expr),
             Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
             Expr::Call(callee, right_paren, args) => {
                 self.evaluate_call_expr(callee, right_paren, args)
@@ -207,7 +207,7 @@ impl Interpreter {
 
                 Ok(Value::List(new_elements))
             }
-            Expr::Index {
+            Expr::Element {
                 var,
                 index,
                 right_bracket,
@@ -232,6 +232,40 @@ impl Interpreter {
                     )),
                 }
             }
+            Expr::AssignToElement { element, value } => match **element {
+                Expr::Element {
+                    ref var,
+                    ref index,
+                    ref right_bracket,
+                } => {
+                    let index = self.evaluate_expr(index)?;
+                    let index = match index {
+                        Value::Num(num) => num,
+                        _ => {
+                            return Err(RuntimeErr::Err(
+                                right_bracket.line,
+                                "Index is geen nummer.".to_string(),
+                            ))
+                        }
+                    };
+
+                    let var = self.evaluate_expr(var)?;
+                    //self.env.get_value(token)
+                    match var {
+                        Value::List(mut elements) => {
+                            //self.env.replace_value(value);
+                            elements[index as usize] = self.evaluate_expr(value)?;
+                            dbg!(elements[index as usize].clone());
+                            Ok(Value::Nil)
+                        }
+                        _ => Err(RuntimeErr::Err(
+                            right_bracket.line,
+                            "Variabele is geen lijst.".to_string(),
+                        )),
+                    }
+                }
+                _ => todo!(),
+            },
         }
     }
 
@@ -436,6 +470,6 @@ impl Interpreter {
         if let Err(msg) = self.env.replace_value(name, &new_value) {
             return Err(RuntimeErr::Err(name.line, msg));
         }
-        Ok(new_value)
+        Ok(Value::Nil)
     }
 }
