@@ -262,4 +262,22 @@ mod tests {
 
         assert_eq!(num, 3.);
     }
+
+    #[test]
+    fn list() {
+        let source = "
+        laat x = [12, -2.3, 3 * 7, \"hey\"];
+            geef x[2];"
+            .to_string();
+
+        let mut lox = Rox::new();
+        let value = lox.run(source);
+
+        let num = match value {
+            Value::Num(num) => num,
+            _ => panic!("Expected num."),
+        };
+
+        assert_eq!(num, 21.);
+    }
 }
