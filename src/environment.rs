@@ -15,8 +15,6 @@ impl Env {
     }
 
     pub fn print_children(&self, i: usize) {
-        //println!("{}: {:?}", i, self.vars);
-        //println!("{:?}", i);
         for (name, value) in self.vars.clone().into_iter() {
             if name == "n" {
                 println!("{}: {:?}", i, value);
@@ -97,7 +95,7 @@ impl Env {
         }
     }
 
-    pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), String> {
+    pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), RuntimeErr> {
         if let Some(ref mut child) = self.child {
             if let Ok(()) = child.replace_value(name, new_value) {
                 return Ok(());
@@ -107,7 +105,8 @@ impl Env {
             *old_value = new_value.clone();
             Ok(())
         } else {
-            Err(format!("'{}' is een onbekende variabele.", name.lexeme))
+            let msg = format!("'{}' is een onbekende variabele.", name.lexeme);
+            Err(RuntimeErr::Err(name.line, msg))
         }
     }
 }

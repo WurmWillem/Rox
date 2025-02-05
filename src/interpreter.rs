@@ -157,15 +157,15 @@ impl Interpreter {
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
-                if let Err(e) = self.evaluate_stmt(statement) {
+                if let Err(err) = self.evaluate_stmt(statement) {
                     self.env.kill_youngest_child();
-                    return Err(e);
+                    return Err(err);
                 }
 
                 current += 1.;
-                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                if let Err(err) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
-                    return Err(RuntimeErr::Err(name.line, msg));
+                    return Err(err);
                 }
             }
 
@@ -173,9 +173,9 @@ impl Interpreter {
                 self.evaluate_stmt(statement)?;
 
                 current -= 1.;
-                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                if let Err(err) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
-                    return Err(RuntimeErr::Err(name.line, msg));
+                    return Err(err);
                 }
             }
             self.env.kill_youngest_child();
@@ -232,7 +232,11 @@ impl Interpreter {
                     )),
                 }
             }
-            Expr::AssignToElement { ref var, ref index, ref value } => match **var {
+            Expr::AssignToElement {
+                ref var,
+                ref index,
+                ref value,
+            } => match **var {
                 Expr::Var(ref name) => {
                     let index = self.evaluate_expr(index)?;
                     let index = match index {
@@ -452,9 +456,7 @@ impl Interpreter {
 
     fn evaluate_assign_expr(&mut self, name: &Token, expr: &Expr) -> Result<Value, RuntimeErr> {
         let new_value = self.evaluate_expr(expr)?;
-        if let Err(msg) = self.env.replace_value(name, &new_value) {
-            return Err(RuntimeErr::Err(name.line, msg));
-        }
+        self.env.replace_value(name, &new_value)?;
         Ok(Value::Nil)
     }
 }
