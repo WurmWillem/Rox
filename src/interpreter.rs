@@ -197,64 +197,82 @@ impl Interpreter {
             Expr::Call(callee, right_paren, args) => {
                 self.evaluate_call_expr(callee, right_paren, args)
             }
-            Expr::List(elements) => {
-                let mut new_elements = Vec::new();
-
-                for e in elements {
-                    let value = self.evaluate_expr(e)?;
-                    new_elements.push(value);
-                }
-
-                Ok(Value::List(new_elements))
-            }
+            Expr::List(elements) => self.evaluate_list_expr(elements),
             Expr::Element {
                 var,
                 index,
                 right_bracket,
-            } => {
+            } => self.evaluate_element_expr(var, index, right_bracket),
+            Expr::AssignToElement {
+                ref var,
+                ref index,
+                ref value,
+            } => self.evaluate_assign_to_element_expr(var, index, value),
+        }
+    }
+
+    fn evaluate_list_expr(&mut self, elements: &Vec<Expr>) -> Result<Value, RuntimeErr> {
+        let mut new_elements = Vec::new();
+
+        for e in elements {
+            let value = self.evaluate_expr(e)?;
+            new_elements.push(value);
+        }
+
+        Ok(Value::List(new_elements))
+    }
+
+    fn evaluate_element_expr(
+        &mut self,
+        var: &Box<Expr>,
+        index: &Box<Expr>,
+        right_bracket: &Token,
+    ) -> Result<Value, RuntimeErr> {
+        let index = self.evaluate_expr(index)?;
+        let index = match index {
+            Value::Num(num) => num,
+            _ => {
+                return Err(RuntimeErr::Err(
+                    right_bracket.line,
+                    "Index is geen nummer.".to_string(),
+                ))
+            }
+        };
+
+        let var = self.evaluate_expr(var)?;
+        match var {
+            Value::List(elements) => Ok(elements[index as usize].clone()),
+            _ => Err(RuntimeErr::Err(
+                right_bracket.line,
+                "Variabele is geen lijst.".to_string(),
+            )),
+        }
+    }
+
+    fn evaluate_assign_to_element_expr(
+        &mut self,
+        var: &Box<Expr>,
+        index: &Box<Expr>,
+        value: &Box<Expr>,
+    ) -> Result<Value, RuntimeErr> {
+        match **var {
+            Expr::Var(ref name) => {
                 let index = self.evaluate_expr(index)?;
                 let index = match index {
-                    Value::Num(num) => num,
+                    Value::Num(num) => num as usize,
                     _ => {
                         return Err(RuntimeErr::Err(
-                            right_bracket.line,
+                            name.line,
                             "Index is geen nummer.".to_string(),
                         ))
                     }
                 };
 
-                let var = self.evaluate_expr(var)?;
-                match var {
-                    Value::List(elements) => Ok(elements[index as usize].clone()),
-                    _ => Err(RuntimeErr::Err(
-                        right_bracket.line,
-                        "Variabele is geen lijst.".to_string(),
-                    )),
-                }
+                let value = self.evaluate_expr(value)?;
+                self.env.replace_element(&name, index, &value)?;
+                Ok(Value::Nil)
             }
-            Expr::AssignToElement {
-                ref var,
-                ref index,
-                ref value,
-            } => match **var {
-                Expr::Var(ref name) => {
-                    let index = self.evaluate_expr(index)?;
-                    let index = match index {
-                        Value::Num(num) => num as usize,
-                        _ => {
-                            return Err(RuntimeErr::Err(
-                                name.line,
-                                "Index is geen nummer.".to_string(),
-                            ))
-                        }
-                    };
-
-                    let value = self.evaluate_expr(value)?;
-                    self.env.replace_element(&name, index, &value)?;
-                    Ok(Value::Nil)
-                }
-                _ => todo!(),
-            },
+            _ => panic!("Unreachable."),
         }
     }
 

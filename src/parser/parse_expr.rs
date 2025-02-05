@@ -13,27 +13,6 @@ impl Parser {
 
     fn assignment(&mut self) -> Result<Expr, RoxError> {
         let expr = self.or()?;
-        //dbg!(expr.clone());
-
-        //if self.matches(vec![TokenType::LeftBracket]) {
-        //    let index = Box::new(self.expression()?);
-        //    let right_bracket =
-        //        self.consume(TokenType::RightBracket, "Je bent de ']' vergeten.")?;
-        //
-        //    let element = Expr::Element {
-        //        var: Box::new(expr),
-        //        index,
-        //        right_bracket,
-        //    };
-        //
-        //    self.consume(TokenType::Equal, "Je bent de '=' vergeten.")?;
-        //
-        //    let value = Box::new(self.expression()?);
-        //    return Ok(Expr::AssignToElement {
-        //        element: Box::new(element),
-        //        value,
-        //    });
-        //}
 
         if self.matches(vec![TokenType::Equal]) {
             let equals = self.previous();
@@ -172,14 +151,8 @@ impl Parser {
             while self.matches(vec![TokenType::Comma]) {
                 elements.push(self.expression()?);
             }
+
             self.consume(TokenType::RightBracket, "Verwachtte ']' na elementen")?;
-
-            //print!("[");
-            //for element in &elements {
-            //    print!("{:?}, ", element);
-            //}
-            //println!("]");
-
             return Ok(Expr::List(elements));
         }
 
