@@ -10,7 +10,7 @@ pub enum Expr {
     Var(Token),
     Assign(Token, Box<Expr>),
     Call(Box<Expr>, Token, Vec<Expr>),
-    //Arr(Box<Expr>, Token, Vec<Box<Expr>>),
+    List(Vec<Expr>),
 }
 // used for debugging purposes
 impl Expr {
@@ -33,6 +33,7 @@ impl Expr {
             Expr::Assign(_, _) => panic!("Unreachable."),
             Expr::Var(_) => panic!("Unreachable."),
             Expr::Call(_, _, _) => panic!("Unreachable."),
+            Expr::List(_) => panic!("Unreachable."),
         }
     }
 }

@@ -129,7 +129,6 @@ impl Parser {
             self.consume(TokenType::RightParen, "Verwachtte ')' na parameter.")?;
         }
 
-
         let msg = format!("Verwachtte '{{' na de {} naam.", kind);
         self.consume(TokenType::LeftBrace, &msg)?;
 
@@ -138,7 +137,7 @@ impl Parser {
             _ => panic!("Unreachable."),
         };
         //for stmt in &body  {
-           //dbg!(stmt); 
+        //dbg!(stmt);
         //}
 
         Ok(Stmt::Function(FunDeclaration { name, params, body }))
@@ -380,7 +379,7 @@ impl Parser {
     }
 
     fn call(&mut self) -> Result<Expr, RoxError> {
-        let mut expr = self.primary()?;
+        let mut expr = self.list()?;
 
         loop {
             if self.matches(vec![TokenType::LeftParen]) {
@@ -405,6 +404,38 @@ impl Parser {
         let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten")?;
 
         Ok(Expr::Call(Box::new(callee), token, arguments))
+    }
+
+    fn list(&mut self) -> Result<Expr, RoxError> {
+        let mut elements = Vec::new();
+
+        if self.matches(vec![TokenType::LeftBracket]) {
+            elements.push(self.primary()?);
+            while self.matches(vec![TokenType::Comma]) {
+                elements.push(self.primary()?);
+            }
+            self.consume(TokenType::RightBracket, "Verwachtte ']' na elementen")?;
+
+            print!("[");
+            for element in &elements {
+                print!("{:?}, ", element);
+            }
+            println!("]");
+
+            return Ok(Expr::List(elements));
+        }
+
+        //if !self.check(TokenType::) {
+        //    elements.push(self.expression()?);
+        //    while self.matches(vec![TokenType::Comma]) {
+        //        elements.push(self.expression()?);
+        //    }
+        //}
+        //
+        //let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten")?;
+
+        self.primary()
+        //Ok(Expr::Call(Box::new(callee), token, elements))
     }
 
     fn primary(&mut self) -> Result<Expr, RoxError> {

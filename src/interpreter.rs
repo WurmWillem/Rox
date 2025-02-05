@@ -194,6 +194,7 @@ impl Interpreter {
             Expr::Call(callee, right_paren, args) => {
                 self.evaluate_call_expr(callee, right_paren, args)
             }
+            Expr::List(elements) => Ok(Value::True),
         }
     }
 
@@ -307,9 +308,10 @@ impl Interpreter {
             TokenType::Caret => match (left, right) {
                 (Value::Num(num1), Value::Num(num2)) => {
                     //if num2 < 0 {
-                    //   num2 *= -1; 
+                    //   num2 *= -1;
                     //}
-                    return Ok(Value::Num(num1.powf(num2)))},
+                    return Ok(Value::Num(num1.powf(num2)));
+                }
                 _ => Err(RuntimeErr::Err(
                     op.line,
                     "'^' kan alleen worden gebruikt op nummers.".to_string(),
