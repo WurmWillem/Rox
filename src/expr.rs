@@ -11,6 +11,10 @@ pub enum Expr {
     Assign(Token, Box<Expr>),
     Call(Box<Expr>, Token, Vec<Expr>),
     List(Vec<Expr>),
+    Index {
+        var: Box<Expr>,
+        index: Box<Expr>,
+    }
 }
 // used for debugging purposes
 impl Expr {
@@ -34,6 +38,7 @@ impl Expr {
             Expr::Var(_) => panic!("Unreachable."),
             Expr::Call(_, _, _) => panic!("Unreachable."),
             Expr::List(_) => panic!("Unreachable."),
+            Expr::Index{var: _, index: _ } => panic!("Unreachable."),
         }
     }
 }

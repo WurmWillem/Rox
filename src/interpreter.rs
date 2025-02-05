@@ -197,12 +197,15 @@ impl Interpreter {
             Expr::List(elements) => {
                 let mut new_elements = Vec::new();
 
-                for e in elements  {
-                   let value = self.evaluate_expr(e)?; 
+                for e in elements {
+                    let value = self.evaluate_expr(e)?;
                     new_elements.push(value);
                 }
 
                 Ok(Value::List(new_elements))
+            }
+            Expr::Index{var, index} => {
+                Ok(Value::Num(5.))
             }
         }
     }

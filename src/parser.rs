@@ -367,23 +367,60 @@ impl Parser {
     }
 
     fn power(&mut self) -> Result<Expr, RoxError> {
-        let mut expr = self.call()?;
+        let mut expr = self.list()?;
 
         while self.matches(vec![TokenType::Caret]) {
             let op = self.previous();
-            let right = self.call()?;
+            let right = self.list()?;
             expr = Expr::Binary(Box::new(expr), op, Box::new(right));
         }
 
         Ok(expr)
     }
 
+    fn list(&mut self) -> Result<Expr, RoxError> {
+        let mut elements = Vec::new();
+
+        if self.matches(vec![TokenType::LeftBracket]) {
+            elements.push(self.expression()?);
+            while self.matches(vec![TokenType::Comma]) {
+                elements.push(self.expression()?);
+            }
+            self.consume(TokenType::RightBracket, "Verwachtte ']' na elementen")?;
+
+            //print!("[");
+            //for element in &elements {
+            //    print!("{:?}, ", element);
+            //}
+            //println!("]");
+
+            return Ok(Expr::List(elements));
+        }
+
+        self.index()
+    }
+
+    fn index(&mut self) -> Result<Expr, RoxError> {
+        let mut var = self.call()?;
+
+        if self.matches(vec![TokenType::LeftBracket]) {
+            let index = self.expression()?;
+            var = Expr::Index {
+                var: Box::new(var),
+                index: Box::new(index),
+            };
+            self.consume(TokenType::RightBracket, "Verwachtte ']' na index")?;
+        }
+
+        Ok(var)
+    }
+
     fn call(&mut self) -> Result<Expr, RoxError> {
-        let mut expr = self.list()?;
+        let mut expr = self.primary()?;
 
         loop {
             if self.matches(vec![TokenType::LeftParen]) {
-                expr = self.finish_call(expr.clone())?;
+                expr = self.finish_call(expr)?;
             } else {
                 break;
             }
@@ -404,28 +441,6 @@ impl Parser {
         let token = self.consume(TokenType::RightParen, "Verwachtte ')' na argumenten")?;
 
         Ok(Expr::Call(Box::new(callee), token, arguments))
-    }
-
-    fn list(&mut self) -> Result<Expr, RoxError> {
-        let mut elements = Vec::new();
-
-        if self.matches(vec![TokenType::LeftBracket]) {
-            elements.push(self.primary()?);
-            while self.matches(vec![TokenType::Comma]) {
-                elements.push(self.primary()?);
-            }
-            self.consume(TokenType::RightBracket, "Verwachtte ']' na elementen")?;
-
-            //print!("[");
-            //for element in &elements {
-            //    print!("{:?}, ", element);
-            //}
-            //println!("]");
-
-            return Ok(Expr::List(elements));
-        }
-
-        self.primary()
     }
 
     fn primary(&mut self) -> Result<Expr, RoxError> {
