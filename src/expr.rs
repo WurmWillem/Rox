@@ -8,8 +8,19 @@ pub enum Expr {
     Unary(Token, Box<Expr>),
     Binary(Box<Expr>, Token, Box<Expr>),
     Var(Token),
-    Assign(Token, Box<Expr>),
-    Call(Box<Expr>, Token, Vec<Box<Expr>>),
+    AssignToExpr(Token, Box<Expr>),
+    AssignToElement {
+        var: Box<Expr>,
+        index: Box<Expr>,
+        value: Box<Expr>,
+    },
+    Call(Box<Expr>, Token, Vec<Expr>),
+    List(Vec<Expr>),
+    Element {
+        var: Box<Expr>,
+        index: Box<Expr>,
+        right_bracket: Token,
+    },
 }
 // used for debugging purposes
 impl Expr {
@@ -29,9 +40,20 @@ impl Expr {
                 let right = *right.clone();
                 parenthesize(token.lexeme.clone(), vec![left, right])
             }
-            Expr::Assign(_, _) => panic!("Unreachable."),
+            Expr::AssignToExpr(_, _) => panic!("Unreachable."),
             Expr::Var(_) => panic!("Unreachable."),
             Expr::Call(_, _, _) => panic!("Unreachable."),
+            Expr::List(_) => panic!("Unreachable."),
+            Expr::Element {
+                right_bracket: _,
+                var: _,
+                index: _,
+            } => panic!("Unreachable."),
+            Expr::AssignToElement {
+                var: _,
+                value: _,
+                index: _,
+            } => panic!("Unreachable."),
         }
     }
 }

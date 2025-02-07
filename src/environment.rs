@@ -1,4 +1,4 @@
-use crate::{token::Token, value::Value};
+use crate::{error::RuntimeErr, token::Token, value::Value};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -15,8 +15,6 @@ impl Env {
     }
 
     pub fn print_children(&self, i: usize) {
-        //println!("{}: {:?}", i, self.vars);
-        //println!("{:?}", i);
         for (name, value) in self.vars.clone().into_iter() {
             if name == "n" {
                 println!("{}: {:?}", i, value);
@@ -71,9 +69,35 @@ impl Env {
         self.vars.get(&token.lexeme).cloned()
     }
 
-    pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), String> {
+    pub fn replace_element(
+        &mut self,
+        name: &Token,
+        index: usize,
+        new_value: &Value,
+    ) -> Result<(), RuntimeErr> {
         if let Some(ref mut child) = self.child {
-            if let Ok(()) = child.replace_value(name, &new_value) {
+            if let Ok(()) = child.replace_element(name, index, new_value) {
+                return Ok(());
+            }
+        }
+
+        if let Some(old_value) = self.vars.get_mut(&name.lexeme) {
+            if let Value::List(elements) = old_value {
+                elements[index] = new_value.clone();
+                Ok(())
+            } else {
+                let msg = format!("'{}' is geen lijst.", name.lexeme);
+                Err(RuntimeErr::Err(name.line, msg))
+            }
+        } else {
+            let msg = format!("'{}' is een onbekende variabele.", name.lexeme);
+            Err(RuntimeErr::Err(name.line, msg))
+        }
+    }
+
+    pub fn replace_value(&mut self, name: &Token, new_value: &Value) -> Result<(), RuntimeErr> {
+        if let Some(ref mut child) = self.child {
+            if let Ok(()) = child.replace_value(name, new_value) {
                 return Ok(());
             }
         }
@@ -81,7 +105,8 @@ impl Env {
             *old_value = new_value.clone();
             Ok(())
         } else {
-            Err(format!("'{}' is een onbekende variabele.", name.lexeme))
+            let msg = format!("'{}' is een onbekende variabele.", name.lexeme);
+            Err(RuntimeErr::Err(name.line, msg))
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    callable::{Clock, Factorial, Fibonacci},
+    callable::{Callable, Clock, Factorial, Fibonacci, Len},
     environment::Env,
     error::{rox_error, RuntimeErr},
     expr::Expr,
@@ -16,14 +16,16 @@ impl Interpreter {
     pub fn new() -> Self {
         let mut env = Env::new();
 
-        let fact = Value::Callable(Box::new(Factorial {}));
-        env.insert_global_value("fact".to_string(), fact);
-
-        let clock = Value::Callable(Box::new(Clock {}));
-        env.insert_global_value("klok".to_string(), clock);
-
-        let fib = Value::Callable(Box::new(Fibonacci {}));
-        env.insert_global_value("fib".to_string(), fib);
+        macro_rules! insert_global_function {
+            ($type: ident) => {
+                let func = Value::Callable(Box::new($type {}));
+                env.insert_global_value($type.to_string(), func);
+            };
+        }
+        insert_global_function!(Factorial);
+        insert_global_function!(Clock);
+        insert_global_function!(Fibonacci);
+        insert_global_function!(Len);
 
         Self { env }
     }
@@ -154,15 +156,15 @@ impl Interpreter {
             self.env.insert_value(&name.lexeme, Value::Num(current));
 
             while current < end {
-                if let Err(e) = self.evaluate_stmt(statement) {
+                if let Err(err) = self.evaluate_stmt(statement) {
                     self.env.kill_youngest_child();
-                    return Err(e);
+                    return Err(err);
                 }
 
                 current += 1.;
-                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                if let Err(err) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
-                    return Err(RuntimeErr::Err(name.line, msg));
+                    return Err(err);
                 }
             }
 
@@ -170,9 +172,9 @@ impl Interpreter {
                 self.evaluate_stmt(statement)?;
 
                 current -= 1.;
-                if let Err(msg) = self.env.replace_value(name, &Value::Num(current)) {
+                if let Err(err) = self.env.replace_value(name, &Value::Num(current)) {
                     self.env.kill_youngest_child();
-                    return Err(RuntimeErr::Err(name.line, msg));
+                    return Err(err);
                 }
             }
             self.env.kill_youngest_child();
@@ -189,11 +191,87 @@ impl Interpreter {
             Expr::Unary(token, expr) => self.evaluate_unary_expr(token, expr),
             Expr::Binary(left, op, right) => self.evaluate_binary_expr(left, op, right),
             Expr::Var(token) => self.evaluate_var_expr(token),
-            Expr::Assign(name, expr) => self.evaluate_assign_expr(name, expr),
+            Expr::AssignToExpr(name, expr) => self.evaluate_assign_expr(name, expr),
             Expr::Logic(left, op, right) => self.evaluate_logic_expr(left, op, right),
             Expr::Call(callee, right_paren, args) => {
                 self.evaluate_call_expr(callee, right_paren, args)
             }
+            Expr::List(elements) => self.evaluate_list_expr(elements),
+            Expr::Element {
+                var,
+                index,
+                right_bracket,
+            } => self.evaluate_element_expr(var, index, right_bracket),
+            Expr::AssignToElement {
+                ref var,
+                ref index,
+                ref value,
+            } => self.evaluate_assign_to_element_expr(var, index, value),
+        }
+    }
+
+    fn evaluate_list_expr(&mut self, elements: &Vec<Expr>) -> Result<Value, RuntimeErr> {
+        let mut new_elements = Vec::new();
+
+        for e in elements {
+            let value = self.evaluate_expr(e)?;
+            new_elements.push(value);
+        }
+
+        Ok(Value::List(new_elements))
+    }
+
+    fn evaluate_element_expr(
+        &mut self,
+        var: &Expr,
+        index: &Expr,
+        right_bracket: &Token,
+    ) -> Result<Value, RuntimeErr> {
+        let index = self.evaluate_expr(index)?;
+        let index = match index {
+            Value::Num(num) => num,
+            _ => {
+                return Err(RuntimeErr::Err(
+                    right_bracket.line,
+                    "Index is geen nummer.".to_string(),
+                ))
+            }
+        };
+
+        let var = self.evaluate_expr(var)?;
+        match var {
+            Value::List(elements) => Ok(elements[index as usize].clone()),
+            _ => Err(RuntimeErr::Err(
+                right_bracket.line,
+                "Variabele is geen lijst.".to_string(),
+            )),
+        }
+    }
+
+    fn evaluate_assign_to_element_expr(
+        &mut self,
+        var: &Expr,
+        index: &Expr,
+        value: &Expr,
+    ) -> Result<Value, RuntimeErr> {
+        match var {
+            Expr::Var(name) => {
+                let index = self.evaluate_expr(index)?;
+                let index = match index {
+                    Value::Num(num) => num as usize,
+                    _ => {
+                        return Err(RuntimeErr::Err(
+                            name.line,
+                            "Index is geen nummer.".to_string(),
+                        ))
+                    }
+                };
+
+                let value = self.evaluate_expr(value)?;
+                self.env.replace_element(&name, index, &value)?;
+                Ok(Value::Nil)
+            }
+            _ => panic!("Unreachable."),
         }
     }
 
@@ -201,7 +279,7 @@ impl Interpreter {
         &mut self,
         callee: &Expr,
         right_paren: &Token,
-        args: &Vec<Box<Expr>>,
+        args: &Vec<Expr>,
     ) -> Result<Value, RuntimeErr> {
         let callee = self.evaluate_expr(callee)?;
 
@@ -225,11 +303,7 @@ impl Interpreter {
             Err(RuntimeErr::Err(right_paren.line, msg))
         }
     }
-    fn evaluate_unary_expr(
-        &mut self,
-        token: &Token,
-        expr: &Box<Expr>,
-    ) -> Result<Value, RuntimeErr> {
+    fn evaluate_unary_expr(&mut self, token: &Token, expr: &Expr) -> Result<Value, RuntimeErr> {
         let right = self.evaluate_expr(expr)?;
 
         match token.kind {
@@ -253,9 +327,9 @@ impl Interpreter {
 
     fn evaluate_binary_expr(
         &mut self,
-        left: &Box<Expr>,
+        left: &Expr,
         op: &Token,
-        right: &Box<Expr>,
+        right: &Expr,
     ) -> Result<Value, RuntimeErr> {
         let left = self.evaluate_expr(left)?;
         let right = self.evaluate_expr(right)?;
@@ -307,9 +381,10 @@ impl Interpreter {
             TokenType::Caret => match (left, right) {
                 (Value::Num(num1), Value::Num(num2)) => {
                     //if num2 < 0 {
-                    //   num2 *= -1; 
+                    //   num2 *= -1;
                     //}
-                    return Ok(Value::Num(num1.powf(num2)))},
+                    Ok(Value::Num(num1.powf(num2)))
+                }
                 _ => Err(RuntimeErr::Err(
                     op.line,
                     "'^' kan alleen worden gebruikt op nummers.".to_string(),
@@ -330,7 +405,7 @@ impl Interpreter {
 
     fn evaluate_logic_expr(
         &mut self,
-        left: &Box<Expr>,
+        left: &Expr,
         op: &Token,
         right: &Expr,
     ) -> Result<Value, RuntimeErr> {
@@ -394,9 +469,7 @@ impl Interpreter {
 
     fn evaluate_assign_expr(&mut self, name: &Token, expr: &Expr) -> Result<Value, RuntimeErr> {
         let new_value = self.evaluate_expr(expr)?;
-        if let Err(msg) = self.env.replace_value(name, &new_value) {
-            return Err(RuntimeErr::Err(name.line, msg));
-        }
-        Ok(new_value)
+        self.env.replace_value(name, &new_value)?;
+        Ok(Value::Nil)
     }
 }
