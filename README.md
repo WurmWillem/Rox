@@ -94,6 +94,14 @@ roep keerDrie(5); // prints 15
   }
   roep fib(6);  // prints 8
   ```
+- Lists
+  ```c
+    // prints every element in the list
+    laat lijst = [12, -2.3, 3 * 7, "hey"];
+
+    voor i van 0 tot lengte(lijst)
+      roep lijst[i];
+  ```
 
 <H2>How do I use Rox?</H2>
 You can either download the source code or ask me for a binary and I'll send you an executable for your platform.

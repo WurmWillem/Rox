@@ -53,7 +53,32 @@ impl Callable for Clock {
     }
 
     fn to_string(&self) -> String {
-        "clock".to_string()
+        "klok".to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Len;
+impl Callable for Len {
+    fn call(&self, arguments: Vec<Value>, _: &mut Interpreter) -> Result<Value, RuntimeErr> {
+        let result = match &arguments[0] {
+            Value::List(values) => values.len(),
+            _ => {
+                return Err(RuntimeErr::Err(
+                    0,
+                    "Je kan len(list) alleen gebruiken op lists.".to_string(),
+                ))
+            }
+        };
+        Ok(Value::Num(result as f64))
+    }
+
+    fn arity(&self) -> usize {
+        1
+    }
+
+    fn to_string(&self) -> String {
+        "lengte".to_string()
     }
 }
 
@@ -82,7 +107,7 @@ impl Callable for Factorial {
     }
 
     fn to_string(&self) -> String {
-        "fibonacci".to_string()
+        "fact".to_string()
     }
 }
 
@@ -124,7 +149,7 @@ impl Callable for Fibonacci {
     }
 
     fn to_string(&self) -> String {
-        "fibonacci".to_string()
+        "fib".to_string()
     }
 }
 

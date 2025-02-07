@@ -1,5 +1,5 @@
 use crate::{
-    callable::{Clock, Factorial, Fibonacci},
+    callable::{Callable, Clock, Factorial, Fibonacci, Len},
     environment::Env,
     error::{rox_error, RuntimeErr},
     expr::Expr,
@@ -16,14 +16,16 @@ impl Interpreter {
     pub fn new() -> Self {
         let mut env = Env::new();
 
-        let fact = Value::Callable(Box::new(Factorial {}));
-        env.insert_global_value("fact".to_string(), fact);
-
-        let clock = Value::Callable(Box::new(Clock {}));
-        env.insert_global_value("klok".to_string(), clock);
-
-        let fib = Value::Callable(Box::new(Fibonacci {}));
-        env.insert_global_value("fib".to_string(), fib);
+        macro_rules! insert_global_function {
+            ($type: ident) => {
+                let func = Value::Callable(Box::new($type {}));
+                env.insert_global_value($type.to_string(), func);
+            };
+        }
+        insert_global_function!(Factorial);
+        insert_global_function!(Clock);
+        insert_global_function!(Fibonacci);
+        insert_global_function!(Len);
 
         Self { env }
     }
@@ -301,11 +303,7 @@ impl Interpreter {
             Err(RuntimeErr::Err(right_paren.line, msg))
         }
     }
-    fn evaluate_unary_expr(
-        &mut self,
-        token: &Token,
-        expr: &Expr,
-    ) -> Result<Value, RuntimeErr> {
+    fn evaluate_unary_expr(&mut self, token: &Token, expr: &Expr) -> Result<Value, RuntimeErr> {
         let right = self.evaluate_expr(expr)?;
 
         match token.kind {
