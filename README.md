@@ -1,6 +1,6 @@
 <H1> Rox: A Refreshingly Simple And Dutch Programming Language </H1>
 
-<H2>Introducing Rox 🦀</H2>r
+<H2>Introducing Rox 🦀</H2>
 This is Rox, my implementation of Lox in Rust with elegant Dutch keywords. The goal of Rox is to spread the beautiful Dutch language to as many people as possible.
 
 <H2>Why should you use Rox?</H2>
